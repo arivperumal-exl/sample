@@ -1,8 +1,3 @@
-best_thresh_idx = int(np.argmax(f1s))
-best_t = float(thresholds[best_thresh_idx])
-pred_labels = (arr_s >= best_t).astype(int)
-
-metrics["img_f1"]        = float(max(f1s))
-metrics["img_threshold"] = best_t
-metrics["img_precision"] = float(precision_score(arr_l, pred_labels, zero_division=0))
-metrics["img_recall"]    = float(recall_score(arr_l, pred_labels, zero_division=0))
+print(f"  Image F1        : {metrics.get('img_f1',        float('nan')):.4f}")
+print(f"  Image Precision : {metrics.get('img_precision', float('nan')):.4f}")
+print(f"  Image Recall    : {metrics.get('img_recall',    float('nan')):.4f}")
