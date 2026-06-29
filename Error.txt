@@ -1,11 +1,17 @@
-# Load threshold from evaluation metrics
-import json
-metrics_path = Path("outputs") / category / "metrics.json"
-if metrics_path.exists():
-    with open(metrics_path) as f:
-        m = json.load(f)
-    learned_threshold = m.get("img_threshold", threshold)
-else:
-    learned_threshold = threshold
+if label == "anomaly":
+    st.error(f"⚠️  **ANOMALY DETECTED** — Score: `{score:.4f}`")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.subheader("Original")
+        st.image(original, use_container_width=True)
+    with col2:
+        st.subheader("Anomaly Map")
+        st.image(heatmap, use_container_width=True)
+    with col3:
+        st.subheader("Defect Location")
+        st.image(overlay, use_container_width=True)
 
-label = "anomaly" if score > learned_threshold else "normal"
+else:
+    st.success(f"✅  **NORMAL** — Score: `{score:.4f}`")
+    st.image(original, use_container_width=True)
