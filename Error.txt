@@ -1,7 +1,11 @@
-streamlit : The term 'streamlit' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the 
-spelling of the name, or if a path was included, verify that the path is correct and try again.
-At line:1 char:1
-+ streamlit run app.py
-+ ~~~~~~~~~
-    + CategoryInfo          : ObjectNotFound: (streamlit:String) [], CommandNotFoundException
-    + FullyQualifiedErrorId : CommandNotFoundException
+import json
+from pathlib import Path
+
+for cat in ['engine_wiring', 'pipe_clips', 'pipe_staples']:
+    metrics_file = Path(f'outputs/{cat}/metrics.json')
+    if metrics_file.exists():
+        m = json.load(open(metrics_file))
+        print(f"\n{cat}")
+        print(f"  Optimal threshold : {m.get('img_threshold', 'N/A')}")
+        print(f"  Image AUROC       : {m.get('img_auroc', 'N/A')}")
+        print(f"  Image F1          : {m.get('img_f1', 'N/A')}")
