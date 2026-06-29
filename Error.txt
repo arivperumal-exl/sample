@@ -1,17 +1,8 @@
-if label == "anomaly":
-    st.error(f"⚠️  **ANOMALY DETECTED** — Score: `{score:.4f}`")
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.subheader("Original")
-        st.image(original, use_container_width=True)
-    with col2:
-        st.subheader("Anomaly Map")
-        st.image(heatmap, use_container_width=True)
-    with col3:
-        st.subheader("Defect Location")
-        st.image(overlay, use_container_width=True)
+best_thresh_idx = int(np.argmax(f1s))
+best_t = float(thresholds[best_thresh_idx])
+pred_labels = (arr_s >= best_t).astype(int)
 
-else:
-    st.success(f"✅  **NORMAL** — Score: `{score:.4f}`")
-    st.image(original, use_container_width=True)
+metrics["img_f1"]        = float(max(f1s))
+metrics["img_threshold"] = best_t
+metrics["img_precision"] = float(precision_score(arr_l, pred_labels, zero_division=0))
+metrics["img_recall"]    = float(recall_score(arr_l, pred_labels, zero_division=0))
