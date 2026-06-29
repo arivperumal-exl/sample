@@ -1,3 +1,26 @@
-print(f"  Image F1        : {metrics.get('img_f1',        float('nan')):.4f}")
-print(f"  Image Precision : {metrics.get('img_precision', float('nan')):.4f}")
-print(f"  Image Recall    : {metrics.get('img_recall',    float('nan')):.4f}")
+import json
+from pathlib import Path
+import yaml
+
+cfg = yaml.safe_load(open("configs/config.yaml"))
+categories = cfg["data"]["categories"]
+
+print(f"\n{'='*60}")
+print(f"  {'Category':<20} {'Img AUROC':>10} {'F1':>8} {'Precision':>10} {'Recall':>8}")
+print(f"{'='*60}")
+
+for cat in categories:
+    metrics_file = Path(f"outputs/{cat}/metrics.json")
+    if metrics_file.exists():
+        m = json.load(open(metrics_file))
+        print(
+            f"  {cat:<20} "
+            f"{m.get('img_auroc',     float('nan')):>10.4f} "
+            f"{m.get('img_f1',        float('nan')):>8.4f} "
+            f"{m.get('img_precision', float('nan')):>10.4f} "
+            f"{m.get('img_recall',    float('nan')):>8.4f}"
+        )
+    else:
+        print(f"  {cat:<20} No results found — run main.py first")
+
+print(f"{'='*60}\n")
