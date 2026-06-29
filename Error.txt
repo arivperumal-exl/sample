@@ -1,11 +1,11 @@
+# Load threshold from evaluation metrics
 import json
-from pathlib import Path
+metrics_path = Path("outputs") / category / "metrics.json"
+if metrics_path.exists():
+    with open(metrics_path) as f:
+        m = json.load(f)
+    learned_threshold = m.get("img_threshold", threshold)
+else:
+    learned_threshold = threshold
 
-for cat in ['engine_wiring', 'pipe_clips', 'pipe_staples']:
-    metrics_file = Path(f'outputs/{cat}/metrics.json')
-    if metrics_file.exists():
-        m = json.load(open(metrics_file))
-        print(f"\n{cat}")
-        print(f"  Optimal threshold : {m.get('img_threshold', 'N/A')}")
-        print(f"  Image AUROC       : {m.get('img_auroc', 'N/A')}")
-        print(f"  Image F1          : {m.get('img_f1', 'N/A')}")
+label = "anomaly" if score > learned_threshold else "normal"
