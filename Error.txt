@@ -1,8 +1,23 @@
-# Draw bounding box around most anomalous region
-bbox = self.get_bounding_box(anomaly_map, (H, W))
-if bbox is not None:
-    x, y, w, h = bbox
-    overlay = cv2.rectangle(overlay.copy(), (x, y), (x+w, y+h), (255, 0, 0), 2)
-    # Label the box
-    cv2.putText(overlay, "Defect", (x, y - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+if label == "anomaly":
+    st.error(f"⚠️  **ANOMALY DETECTED** — Score: `{score:.4f}`")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.subheader("Original")
+        st.image(original, use_container_width=True)
+    with col2:
+        st.subheader("Anomaly Map")
+        st.image(heatmap, use_container_width=True)
+    with col3:
+        st.subheader("Defect Location")
+        st.image(overlay, use_container_width=True)
+
+    # Show bounding box coordinates
+    if bbox is not None:
+        x, y, w, h = bbox
+        st.info(
+            f"📦 **Defect Region** — "
+            f"Top-left: `({x}, {y})` | "
+            f"Width: `{w}px` | "
+            f"Height: `{h}px`"
+        )
