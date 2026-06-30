@@ -1,21 +1,8 @@
-def get_bounding_box(self, anomaly_map: np.ndarray, original_size: tuple) -> tuple:
-    """
-    Returns (x, y, w, h) of the bounding box around the highest anomaly region.
-    """
-    H, W = original_size
-    amap = gaussian_filter(anomaly_map.astype(np.float32), sigma=4)
-    amap_norm = self._normalise(amap)
-    amap_resized = cv2.resize(amap_norm, (W, H), interpolation=cv2.INTER_LINEAR)
-
-    # Threshold at 50% of max to find the hottest region
-    thresh = amap_resized.max() * 0.5
-    binary = (amap_resized > thresh).astype(np.uint8) * 255
-
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if not contours:
-        return None
-
-    # Pick the largest contour
-    largest = max(contours, key=cv2.contourArea)
-    x, y, w, h = cv2.boundingRect(largest)
-    return (x, y, w, h)
+# Draw bounding box around most anomalous region
+bbox = self.get_bounding_box(anomaly_map, (H, W))
+if bbox is not None:
+    x, y, w, h = bbox
+    overlay = cv2.rectangle(overlay.copy(), (x, y), (x+w, y+h), (255, 0, 0), 2)
+    # Label the box
+    cv2.putText(overlay, "Defect", (x, y - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
