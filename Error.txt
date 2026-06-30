@@ -1,26 +1,21 @@
-import json
-from pathlib import Path
-import yaml
+def get_bounding_box(self, anomaly_map: np.ndarray, original_size: tuple) -> tuple:
+    """
+    Returns (x, y, w, h) of the bounding box around the highest anomaly region.
+    """
+    H, W = original_size
+    amap = gaussian_filter(anomaly_map.astype(np.float32), sigma=4)
+    amap_norm = self._normalise(amap)
+    amap_resized = cv2.resize(amap_norm, (W, H), interpolation=cv2.INTER_LINEAR)
 
-cfg = yaml.safe_load(open("configs/config.yaml"))
-categories = cfg["data"]["categories"]
+    # Threshold at 50% of max to find the hottest region
+    thresh = amap_resized.max() * 0.5
+    binary = (amap_resized > thresh).astype(np.uint8) * 255
 
-print(f"\n{'='*60}")
-print(f"  {'Category':<20} {'Img AUROC':>10} {'F1':>8} {'Precision':>10} {'Recall':>8}")
-print(f"{'='*60}")
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        return None
 
-for cat in categories:
-    metrics_file = Path(f"outputs/{cat}/metrics.json")
-    if metrics_file.exists():
-        m = json.load(open(metrics_file))
-        print(
-            f"  {cat:<20} "
-            f"{m.get('img_auroc',     float('nan')):>10.4f} "
-            f"{m.get('img_f1',        float('nan')):>8.4f} "
-            f"{m.get('img_precision', float('nan')):>10.4f} "
-            f"{m.get('img_recall',    float('nan')):>8.4f}"
-        )
-    else:
-        print(f"  {cat:<20} No results found — run main.py first")
-
-print(f"{'='*60}\n")
+    # Pick the largest contour
+    largest = max(contours, key=cv2.contourArea)
+    x, y, w, h = cv2.boundingRect(largest)
+    return (x, y, w, h)
