@@ -1,26 +1,24 @@
-def apply_roi(
-    self,
-    anomaly_map: np.ndarray,
-    roi_cfg: dict,
-    spatial_shape: tuple,
-) -> np.ndarray:
-    """Apply weighted mask — full weight inside ROI, low weight outside."""
-    if not roi_cfg.get("enabled", False):
-        return anomaly_map
+score, amap, original_np = run_inference(
+    image_pil, extractor, patchcore, cfg
+)
 
-    h, w = spatial_shape
-    orig_size = 224
-
+# Apply ROI weighting to anomaly map in UI as well
+import numpy as np
+roi_cfg_cat = cfg.get("roi", {}).get(category, {})
+if roi_cfg_cat.get("enabled", False):
+    h, w = amap.shape
+    orig_size = cfg["data"]["center_crop"]
     scale_x = w / orig_size
     scale_y = h / orig_size
 
-    x  = int(roi_cfg["x"]      * scale_x)
-    y  = int(roi_cfg["y"]      * scale_y)
-    rw = int(roi_cfg["width"]  * scale_x)
-    rh = int(roi_cfg["height"] * scale_y)
+    x  = int(roi_cfg_cat["x"]      * scale_x)
+    y  = int(roi_cfg_cat["y"]      * scale_y)
+    rw = int(roi_cfg_cat["width"]  * scale_x)
+    rh = int(roi_cfg_cat["height"] * scale_y)
 
-    outside_weight = roi_cfg.get("outside_weight", 0.1)
+    outside_weight = roi_cfg_cat.get("outside_weight", 0.0)
     weight_map = np.full((h, w), outside_weight, dtype=np.float32)
-    weight_map[y:y+rh, x:x+rw] = roi_cfg.get("weight", 1.0)
+    weight_map[y:y+rh, x:x+rw] = roi_cfg_cat.get("weight", 1.0)
 
-    return anomaly_map * weight_map
+    amap  = amap * weight_map          # weighted map
+    score = float(amap.max())          # recompute score
