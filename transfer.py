@@ -1,63 +1,44 @@
-"""
-Run this script to interactively select ROI on a sample image.
-Draw a rectangle on the image — coordinates are printed to terminal.
-
-Usage:
-    python select_roi.py --category engine_wiring
-"""
-import argparse
-from pathlib import Path
-import streamlit as st
-from streamlit_drawable_canvas import st_canvas
-from PIL import Image
+# select_roi.py
+import cv2
 import yaml
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--category", default="engine_wiring")
-args, _ = parser.parse_known_args()
+from pathlib import Path
+import argparse
 
 cfg = yaml.safe_load(open("configs/config.yaml"))
+categories = cfg["data"]["categories"]
+
+print("Available categories:")
+for i, cat in enumerate(categories):
+    print(f"  {i+1}. {cat}")
+
+choice = input("\nEnter category number: ")
+category = categories[int(choice) - 1]
+
 crop = cfg["data"]["center_crop"]
 
-st.title(f"ROI Selector — {args.category}")
-st.write("Draw a rectangle on the region you want to prioritise. Copy the coordinates to config.yaml")
-
-# Load a sample good image
-sample_dir = Path(f"data/{args.category}/train/good")
+sample_dir = Path(f"data/{category}/train/good")
 images = list(sample_dir.glob("*.*"))
-if not images:
-    st.error("No training images found")
-    st.stop()
 
-selected = st.selectbox("Select sample image", [p.name for p in images])
-img_path = sample_dir / selected
-img = Image.open(img_path).convert("RGB").resize((crop, crop))
+print(f"\nAvailable images in {category}:")
+for i, img in enumerate(images[:10]):   # show first 10
+    print(f"  {i+1}. {img.name}")
 
-st.subheader("Draw rectangle on the region to prioritise")
-canvas = st_canvas(
-    fill_color="rgba(255, 0, 0, 0.1)",
-    stroke_width=2,
-    stroke_color="#FF0000",
-    background_image=img,
-    drawing_mode="rect",
-    width=crop,
-    height=crop,
-    key="roi_canvas",
-)
+img_choice = input("\nEnter image number: ")
+img_path = images[int(img_choice) - 1]
 
-if canvas.json_data is not None:
-    objects = canvas.json_data.get("objects", [])
-    if objects:
-        rect = objects[-1]   # use the last drawn rectangle
-        x  = int(rect["left"])
-        y  = int(rect["top"])
-        w  = int(rect["width"])
-        h  = int(rect["height"])
+img = cv2.imread(str(img_path))
+img = cv2.resize(img, (crop, crop))
 
-        st.success("ROI Coordinates — copy these to configs/config.yaml")
-        st.code(f"""
+print("\nDraw a rectangle with your mouse. Press ENTER to confirm, R to reset.")
+roi = cv2.selectROI("Select ROI", img, fromCenter=False, showCrosshair=True)
+cv2.destroyAllWindows()
+
+x, y, w, h = int(roi[0]), int(roi[1]), int(roi[2]), int(roi[3])
+
+print(f"\nCopy these to configs/config.yaml:")
+print(f"""
 roi:
-  {args.category}:
+  {category}:
     enabled: true
     x: {x}
     y: {y}
@@ -65,5 +46,4 @@ roi:
     height: {h}
     weight: 1.0
     outside_weight: 0.1
-        """)
-        st.write(f"x={x}, y={y}, width={w}, height={h}")
+""")
