@@ -1,21 +1,28 @@
-def get_bounding_box(self, anomaly_map: np.ndarray, original_size: tuple) -> tuple:
-    """
-    Returns (x, y, w, h) bounding box around the highest scoring patch.
-    """
-    H, W = original_size
-    amap = gaussian_filter(anomaly_map.astype(np.float32), sigma=2)
-    amap_norm = self._normalise(amap)
-    amap_resized = cv2.resize(amap_norm, (W, H), interpolation=cv2.INTER_LINEAR)
+def apply_roi(
+    self,
+    anomaly_map: np.ndarray,
+    roi_cfg: dict,
+    spatial_shape: tuple,
+) -> np.ndarray:
+    """Apply weighted mask — high weight inside ROI, low weight outside."""
+    if not roi_cfg.get("enabled", False):
+        return anomaly_map
 
-    # Find the single highest scoring location
-    max_loc = np.unravel_index(amap_resized.argmax(), amap_resized.shape)
-    y_center, x_center = max_loc
+    h, w = spatial_shape
+    orig_size = 224   # center_crop size
 
-    # Draw a fixed-size box around it
-    box_size = min(H, W) // 6
-    x = max(0, x_center - box_size // 2)
-    y = max(0, y_center - box_size // 2)
-    w = min(W - x, box_size)
-    h = min(H - y, box_size)
+    # Scale ROI coordinates from image space to feature map space
+    scale_x = w / orig_size
+    scale_y = h / orig_size
 
-    return (x, y, w, h)
+    x  = int(roi_cfg["x"]      * scale_x)
+    y  = int(roi_cfg["y"]      * scale_y)
+    rw = int(roi_cfg["width"]  * scale_x)
+    rh = int(roi_cfg["height"] * scale_y)
+
+    # Build weight map — outside_weight for background, 1.0 for ROI
+    outside_weight = roi_cfg.get("outside_weight", 0.1)
+    weight_map = np.full((h, w), outside_weight, dtype=np.float32)
+    weight_map[y:y+rh, x:x+rw] = roi_cfg.get("weight", 1.0)
+
+    return anomaly_map * weight_map
