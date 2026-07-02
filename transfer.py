@@ -1,49 +1,26 @@
-# select_roi.py
-import cv2
-import yaml
-from pathlib import Path
-import argparse
+def apply_roi(
+    self,
+    anomaly_map: np.ndarray,
+    roi_cfg: dict,
+    spatial_shape: tuple,
+) -> np.ndarray:
+    """Apply weighted mask — full weight inside ROI, low weight outside."""
+    if not roi_cfg.get("enabled", False):
+        return anomaly_map
 
-cfg = yaml.safe_load(open("configs/config.yaml"))
-categories = cfg["data"]["categories"]
+    h, w = spatial_shape
+    orig_size = 224
 
-print("Available categories:")
-for i, cat in enumerate(categories):
-    print(f"  {i+1}. {cat}")
+    scale_x = w / orig_size
+    scale_y = h / orig_size
 
-choice = input("\nEnter category number: ")
-category = categories[int(choice) - 1]
+    x  = int(roi_cfg["x"]      * scale_x)
+    y  = int(roi_cfg["y"]      * scale_y)
+    rw = int(roi_cfg["width"]  * scale_x)
+    rh = int(roi_cfg["height"] * scale_y)
 
-crop = cfg["data"]["center_crop"]
+    outside_weight = roi_cfg.get("outside_weight", 0.1)
+    weight_map = np.full((h, w), outside_weight, dtype=np.float32)
+    weight_map[y:y+rh, x:x+rw] = roi_cfg.get("weight", 1.0)
 
-sample_dir = Path(f"data/{category}/train/good")
-images = list(sample_dir.glob("*.*"))
-
-print(f"\nAvailable images in {category}:")
-for i, img in enumerate(images[:10]):   # show first 10
-    print(f"  {i+1}. {img.name}")
-
-img_choice = input("\nEnter image number: ")
-img_path = images[int(img_choice) - 1]
-
-img = cv2.imread(str(img_path))
-img = cv2.resize(img, (crop, crop))
-
-print("\nDraw a rectangle with your mouse. Press ENTER to confirm, R to reset.")
-roi = cv2.selectROI("Select ROI", img, fromCenter=False, showCrosshair=True)
-cv2.destroyAllWindows()
-
-x, y, w, h = int(roi[0]), int(roi[1]), int(roi[2]), int(roi[3])
-
-print(f"\nCopy these to configs/config.yaml:")
-print(f"""
-roi:
-  {category}:
-    enabled: true
-    x: {x}
-    y: {y}
-    width: {w}
-    height: {h}
-    weight: 1.0
-    outside_weight: 0.1
-""")
+    return anomaly_map * weight_map
