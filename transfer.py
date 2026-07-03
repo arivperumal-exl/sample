@@ -155,4 +155,56 @@ class StructuralInspector:
         """
         hsv = cv2.cvtColor(region, cv2.COLOR_RGB2HSV)
 
-        # Silver/metallic = low
+        # Silver/metallic = low saturation, high brightness
+        lower_silver = np.array([0,   0,  150])
+        upper_silver = np.array([180, 50, 255])
+        mask = cv2.inRange(hsv, lower_silver, upper_silver)
+
+        # Remove blue hoop region from clip detection
+        if hoop_contour is not None:
+            hoop_mask = np.zeros(region.shape[:2], dtype=np.uint8)
+            cv2.drawContours(hoop_mask, [hoop_contour], -1, 255, -1)
+            mask = cv2.bitwise_and(mask, cv2.bitwise_not(hoop_mask))
+
+        kernel = np.ones((5, 5), np.uint8)
+        mask   = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        mask   = cv2.morphologyEx(mask, cv2.MORPH_OPEN,  kernel)
+
+        contours, _ = cv2.findContours(
+            mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+
+        clips = []
+        for c in contours:
+            area = cv2.contourArea(c)
+            if area < self.min_clip_area:
+                continue
+            if area > 20000:         # too large — background metal
+                continue
+
+            x, y, w, h = cv2.boundingRect(c)
+            aspect = w / (h + 1e-5)
+
+            # Clips are roughly square or slightly wide
+            if 0.3 < aspect < 3.0:
+                clips.append((x, y, w, h))
+
+        # Sort left to right — return the two most prominent
+        clips.sort(key=lambda b: b[0])
+        clips.sort(key=lambda b: b[2]*b[3], reverse=True)
+        return clips[:2]
+
+    # ------------------------------------------------------------------
+    def _is_hoop_between_clips(
+        self,
+        hoop_contour: np.ndarray,
+        clips: List[Tuple[int, int, int, int]],
+    ) -> bool:
+        """Check if hoop centre x lies between the two clip centres."""
+        M = cv2.moments(hoop_contour)
+        if M["m00"] == 0:
+            return False
+        hoop_cx = int(M["m10"] / M["m00"])
+
+        clip_centers_x = sorted([c[0] + c[2] // 2 for c in clips])
+        return clip_centers_x[0] < hoop_cx < clip_centers_x[1]
