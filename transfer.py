@@ -1,7 +1,15 @@
-with st.expander("Tuning"):
-    blue_low   = st.slider("Blue hue low",       80,  120,  95)
-    blue_high  = st.slider("Blue hue high",      120, 140, 130)
-    min_hoop   = st.slider("Min hoop area",      100, 1000, 200)
-    min_clip   = st.slider("Min clip area",      100, 1000, 300)
-    max_clip   = st.slider("Max clip area",     1000, 10000, 5000)
-    brightness = st.slider("Clip min brightness", 150, 240, 180)
+def __init__(
+    self,
+    blue_hue_low=95,
+    blue_hue_high=130,
+    min_hoop_area=200,
+    min_clip_area=300,
+    max_clip_area=5000,
+    clip_min_brightness=180,
+):
+    self.blue_hue_low       = blue_hue_low
+    self.blue_hue_high      = blue_hue_high
+    self.min_hoop_area      = min_hoop_area
+    self.min_clip_area      = min_clip_area
+    self.max_clip_area      = max_clip_area
+    self.clip_min_brightness = clip_min_brightness
