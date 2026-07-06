@@ -1,85 +1,37 @@
-def _detect_clips(
+def _merge_overlapping_boxes(
     self,
-    region: np.ndarray,
-    hoop_contour: Optional[np.ndarray],
+    boxes: List[Tuple[int, int, int, int]],
+    overlap_thresh: float = 0.3,
 ) -> List[Tuple[int, int, int, int]]:
-    """
-    Detect metal clips using edge detection + shape filtering.
-    Clips are small rectangular metallic clamps over the wires.
-    """
-    gray    = cv2.cvtColor(region, cv2.COLOR_RGB2GRAY)
-    hsv     = cv2.cvtColor(region, cv2.COLOR_RGB2HSV)
+    """Merge boxes that overlap significantly into one box."""
+    if not boxes:
+        return []
 
-    # ── Step 1: Find bright metallic regions ──────────────────────────
-    lower_silver = np.array([0,   0,  self.clip_min_brightness])
-    upper_silver = np.array([180, 50, 255])
-    silver_mask  = cv2.inRange(hsv, lower_silver, upper_silver)
+    merged = []
+    used   = [False] * len(boxes)
 
-    # ── Step 2: Remove blue hoop ───────────────────────────────────────
-    if hoop_contour is not None:
-        hoop_mask = np.zeros(region.shape[:2], dtype=np.uint8)
-        cv2.drawContours(hoop_mask, [hoop_contour], -1, 255, -1)
-        # Also remove area around hoop
-        kernel    = np.ones((10, 10), np.uint8)
-        hoop_mask = cv2.dilate(hoop_mask, kernel, iterations=1)
-        silver_mask = cv2.bitwise_and(
-            silver_mask, cv2.bitwise_not(hoop_mask)
-        )
-
-    # ── Step 3: Remove large background metal regions ─────────────────
-    # Background metal sheet forms very large contours — filter by size
-    kernel      = np.ones((3, 3), np.uint8)
-    silver_mask = cv2.morphologyEx(silver_mask, cv2.MORPH_OPEN,  kernel)
-    silver_mask = cv2.morphologyEx(silver_mask, cv2.MORPH_CLOSE, kernel)
-
-    contours, _ = cv2.findContours(
-        silver_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
-
-    # ── Step 4: Filter by size AND rectangularity ─────────────────────
-    clips = []
-    for c in contours:
-        area = cv2.contourArea(c)
-        if area < self.min_clip_area:
+    for i, (x1, y1, w1, h1) in enumerate(boxes):
+        if used[i]:
             continue
-        if area > self.max_clip_area:
-            continue
+        group = [(x1, y1, w1, h1)]
+        for j, (x2, y2, w2, h2) in enumerate(boxes):
+            if i == j or used[j]:
+                continue
+            ix = max(x1, x2)
+            iy = max(y1, y2)
+            iw = min(x1+w1, x2+w2) - ix
+            ih = min(y1+h1, y2+h2) - iy
+            if iw > 0 and ih > 0:
+                overlap = (iw * ih) / min(w1*h1, w2*h2)
+                if overlap > overlap_thresh:
+                    group.append((x2, y2, w2, h2))
+                    used[j] = True
 
-        cx, cy, cw, ch = cv2.boundingRect(c)
+        gx = min(b[0] for b in group)
+        gy = min(b[1] for b in group)
+        gw = max(b[0]+b[2] for b in group) - gx
+        gh = max(b[1]+b[3] for b in group) - gy
+        merged.append((gx, gy, gw, gh))
+        used[i] = True
 
-        # Aspect ratio — clips are wider than tall or roughly square
-        aspect = cw / (ch + 1e-5)
-        if not (0.4 < aspect < 3.0):
-            continue
-
-        # Rectangularity — clip fills most of its bounding box
-        # (background metal has irregular shapes, clips are compact)
-        rect_area    = cw * ch
-        fill_ratio   = area / (rect_area + 1e-5)
-        if fill_ratio < 0.4:       # less than 40% fill = irregular shape
-            continue
-
-        # Solidity — clip contour is solid, not irregular
-        hull          = cv2.convexHull(c)
-        hull_area     = cv2.contourArea(hull)
-        solidity      = area / (hull_area + 1e-5)
-        if solidity < 0.6:         # too irregular
-            continue
-
-        clips.append((cx, cy, cw, ch))
-
-    # ── Step 5: Merge overlapping boxes ───────────────────────────────
-    clips = self._merge_overlapping_boxes(clips, overlap_thresh=0.3)
-
-    # ── Step 6: Pick the two most central clips ────────────────────────
-    # Clips are in the centre of the image over the wires
-    # Background metal tends to be at the edges
-    img_cx = region.shape[1] // 2
-    img_cy = region.shape[0] // 2
-
-    def distance_to_centre(box):
-        bx, by, bw, bh = box
-        return abs((bx + bw // 2) - img_cx) + abs((by + bh // 2) - img_cy)
-
-    clips.sort(key=distance_to_centre)   # closest to centre first
-    return clips[:2]
+    return merged
