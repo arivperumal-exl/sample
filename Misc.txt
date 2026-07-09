@@ -1,32 +1,95 @@
-Orange Wires (2 wires)
-Orange is commonly used in automotive wiring for high current or high importance circuits. In this location on the engine block near the cylinder head these are most likely:
+## Solution Accelerator Use Case
+### AI-Powered Visual Inspection for Engine Wiring Assembly
 
-Fuel injector power supply wires — carrying switched 12V power to the fuel injectors on each cylinder bank
-Or oxygen sensor heater wires — powering the heating element inside the lambda/O2 sensor to bring it to operating temperature quickly
+---
 
+### The Setting
 
-Yellow Wire (1 wire)
-Yellow in automotive wiring typically represents:
+A leading Tier 1 automotive wire harness manufacturer supplies engine wiring assemblies to a major OEM producing 1,200 vehicles per day across two production shifts. The assembly being inspected contains three critical wires — an orange fuel injector power supply wire, a yellow camshaft position sensor signal wire and a green crankshaft position sensor signal wire — bundled together and routed across the engine block casting near the cylinder head. The bundle is held in place by a blue retention hoop positioned between two metal clips fastened to the engine structure. These three wires collectively govern the entire fuel injection and ignition timing sequence of the engine. Any failure in their containment or physical integrity directly impacts vehicle safety, emissions compliance and engine reliability.
 
-Crankshaft position sensor signal wire — sending the rotational position pulse to the ECU for ignition timing and fuel injection synchronisation
-Or camshaft position sensor signal — used by the ECU to identify which cylinder is on its compression stroke for sequential fuel injection
+---
 
+### The Business Problem
 
-Green Wire (1 wire)
-Green is commonly used for:
+The manufacturer currently relies on manual visual inspection and electrical continuity testing to quality-gate every engine wiring assembly before it ships to the OEM vehicle assembly plant. While electrical testing reliably confirms circuit continuity, it is completely blind to physical assembly defects. Manual visual inspection, performed by operators checking hundreds of assemblies per shift against a reference board, produces inconsistent results — detection rates drop significantly in the second half of each shift due to inspector fatigue, lighting variation on the production floor and the subtlety of containment defects such as a displaced hoop or an incompletely fastened clip.
 
-Sensor signal return or ground reference wire — providing a clean ground reference for sensor circuits
-Or knock sensor signal wire — carrying the vibration signal from the knock sensor to the ECU so it can retard ignition timing to prevent engine damage
+The business consequence is severe. Defective assemblies that escape to the vehicle build stage cost between 8 and 12 times more to rectify than defects caught at the Tier 1 assembly stage. Field failures caused by wiring containment defects result in warranty claims, roadside breakdowns and in the worst cases vehicle recalls affecting thousands of units. A single recall event for a wiring harness defect can cost tens of millions of dollars in parts, labour, logistics and brand damage — far exceeding the entire annual cost of an automated inspection programme.
 
+The manufacturer needs a solution that can inspect every assembly consistently at production line speed, detect both surface-level wire defects and structural containment failures, and produce a digital audit trail that supports quality compliance reporting.
 
-Foil Wrapped Section (right side)
-The silver foil sheathing on the right portion of the bundle is thermal insulation wrapping — used when wires must pass close to the exhaust manifold or turbocharger. This confirms the bundle is routed near a significant heat source and the wires inside are likely:
+---
 
-Oxygen sensor wiring — which must run from the ECU all the way to the exhaust manifold where the sensor is mounted
-Or EGT (Exhaust Gas Temperature) sensor wiring in turbocharged applications
+### The Current State — How Inspection is Done Today
 
+**Manual Visual Inspection**
+Trained operators stationed at the quality gate visually check each assembly against a golden sample reference board. They look for missing components, gross misrouting and obvious insulation damage. Inspection takes 15 to 20 seconds per assembly. Detection rates are estimated at 65 to 75 percent for subtle defects and fall further during the second production shift. No digital record of individual inspection decisions is produced.
 
-Why the Blue Hoop and Clips Matter Here
-Given these wires are carrying critical sensor signals to the ECU:
-WireIf damaged or looseFuel injector wireCylinder misfires, rough running, increased emissionsCrankshaft sensor wireEngine stalls, fails to start, limp modeKnock sensor wireEngine damage from undetected knock, reduced powerO2 sensor wireRich/lean fuel mixture, high emissions, catalytic converter damage
-All of these are safety and emissions critical circuits — making the correct containment of this bundle between the two clips and hoop not just an assembly quality issue but a direct vehicle safety and regulatory compliance requirement.
+**Electrical Continuity Testing**
+Every assembly is plugged into a test board that verifies circuit continuity, resistance values and pin assignments for the orange, yellow and green circuits. This catches wiring errors and connector failures with near 100 percent accuracy but cannot detect physical containment defects — a missing clip, a displaced hoop or damaged insulation that has not yet caused an electrical fault all pass this test undetected.
+
+**Pull Force Testing**
+A sample of connectors are pull-tested to verify correct locking. This is a sampling process and does not cover every assembly or assess the physical routing and containment of the wire bundle.
+
+**Gap in Current Process**
+None of the three current inspection methods can reliably answer the three most critical containment questions for this assembly — is the blue hoop present, are both clips correctly fastened, and is the hoop positioned between the two clips. This gap is where field failures originate.
+
+---
+
+### The Solution Accelerator
+
+The AI-Powered Engine Wiring Visual Inspection Solution Accelerator delivers an end-to-end automated inspection capability specifically designed to close this gap. It combines two complementary inspection engines operating in parallel on every assembly image captured at the quality gate station.
+
+**Engine 1 — Anomaly Detection (PatchCore)**
+A PatchCore model is trained exclusively on images of correctly assembled engine wiring harnesses — no defect labels or anomaly examples are required. The model learns what normal looks like at the patch level across the full assembly area, capturing the characteristic appearance of the orange, yellow and green wire insulation, the blue hoop surface, the metallic clip finish and the surrounding engine casting. At inspection time the model compares every patch of a new assembly image against its memory of normal patches and computes an anomaly score. Patches that deviate from normal — damaged insulation, unusual surface texture, incorrect wire positioning — produce high anomaly scores and are highlighted on a spatial heatmap with a bounding box drawn around the most anomalous region. The image-level score is compared against a threshold learned during evaluation to produce a binary PASS or FAIL decision.
+
+**Engine 2 — Structural Inspector (Rule-Based Computer Vision)**
+A rule-based structural inspection module runs simultaneously on the same image to verify the three critical containment conditions. Using HSV colour segmentation it detects the blue retention hoop by isolating its distinctive blue colour from the surrounding scene. Using contour analysis restricted to the wire bundle region it identifies the two metal clips by their metallic silver appearance overlapping the coloured wires. It then applies a geometric spatial rule — the centre of the blue hoop must lie between the right edge of the left clip and the left edge of the right clip. Any deviation from this configuration, regardless of how subtle, triggers a structural failure.
+
+**Region of Interest Control**
+Both inspection engines operate within a Region of Interest defined by the quality engineer for each assembly variant. This focuses computation on the critical assembly area and eliminates false detections from surrounding metal structures, background lighting variation and non-relevant components in the image frame.
+
+**Inspection Result and Audit Trail**
+Every inspection produces a timestamped record containing the anomaly score, structural check results, PASS or FAIL decision, and an annotated image showing detected defects with heatmap overlays, bounding boxes and structural component labels. Results are stored and aggregated into a summary dashboard reporting image-level AUROC, F1 score, precision and recall per assembly category across every production shift.
+
+---
+
+### The Improved State — How Inspection Works With the Solution
+
+The camera at the quality gate captures an image of each assembly as it passes through. Within two seconds the system returns a result.
+
+For a correctly assembled harness — blue hoop present, centred between two properly fastened clips, no insulation damage on orange, yellow or green — the system returns a green PASS banner. The assembly is cleared to ship to the OEM vehicle assembly plant. The inspection record is logged automatically.
+
+For an assembly where the hoop has slipped to one side of the left clip — the exact defect that the tired human inspector missed on the late shift — the structural inspector detects that the hoop centre falls outside the gap between the two clip edges and returns a FAIL with the message "Blue hoop is not between the two clips." The assembly is held at the quality gate and routed for rework before it can progress to vehicle build.
+
+For an assembly where the green crankshaft position sensor wire shows a small area of insulation damage caused by a sharp edge during assembly — a defect invisible to the human eye at production speed — the PatchCore anomaly model detects the patch as significantly different from its memory of normal insulation appearance and returns a FAIL with the anomaly heatmap highlighting the exact damaged region. The assembly is held for rework.
+
+For an assembly where both conditions exist — a displaced hoop and surface damage — both inspection engines return failures simultaneously and the combined result is presented to the operator with full detail on each failure mode.
+
+---
+
+### Business Impact
+
+**Quality Improvement**
+Consistent detection of physical containment defects and surface anomalies across 100 percent of assemblies regardless of shift, operator or lighting condition. Estimated improvement in defect detection rate from 65-75 percent with manual inspection to greater than 95 percent with AI-powered inspection based on published industry benchmarks.
+
+**Cost Reduction**
+Defects caught at the Tier 1 quality gate cost a fraction of defects caught at the OEM plant or in the field. Every displaced hoop or damaged insulation caught by the system before shipment eliminates a potential warranty claim, roadside breakdown or recall event downstream.
+
+**Production Efficiency**
+Inspection time per assembly reduces from 15-20 seconds of manual inspection to under 2 seconds of automated inspection, eliminating the quality gate as a production line bottleneck.
+
+**Compliance and Traceability**
+Every inspection decision is logged digitally with full detail — eliminating the audit trail gap that manual inspection creates and enabling the manufacturer to demonstrate quality compliance to OEM customers and regulatory bodies with complete, timestamped inspection records for every assembly produced.
+
+**Scalability**
+The solution accelerator is designed to extend to other wiring assembly variants and component categories with minimal effort. Training a new anomaly detection model requires only a set of good assembly images — no defect labelling, no complex data preparation. The structural inspection module can be adapted to new component geometries by adjusting colour thresholds and spatial rules through the configuration file and tuning sliders in the inspection interface.
+
+---
+
+### Why Orange, Yellow and Green Are Now Safe
+
+The crankshaft position sensor signal carried by the green wire reaches the ECU cleanly with every engine revolution for the life of the vehicle — because the AI inspection system caught the three-millimetre hoop displacement and the hairline insulation damage that the manual process missed. The blue hoop sits correctly between the two clips. The clips are fastened. The bundle does not move with engine vibration. The wires do not chafe against the engine casting.
+
+The engine fires correctly. The vehicle runs reliably. The customer never stalls at a junction. No warranty claim is filed. No recall is initiated.
+
+This is what the solution accelerator delivers — not just a quality inspection tool, but the assurance that the three most critical wires in the engine firing sequence are correctly contained, correctly protected and correctly positioned every time a vehicle leaves the factory.
