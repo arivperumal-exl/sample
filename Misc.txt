@@ -1,1 +1,32 @@
-Engine wiring harnesses are a critical component located in the engine bay of automobiles, typically routed along the engine block and secured to structural mounting points. These harnesses carry electrical signals between the engine control unit and key sensors and actuators including fuel injectors, oxygen sensors, temperature sensors and ignition systems. In the AutoVI dataset, the specific assembly being inspected consists of a bundle of coloured wires — orange, yellow and green — that must be held together by a blue retention hoop and secured in position by two metal clips fastened on either side of the hoop. If the wires are not properly contained within this hoop and clip arrangement, the bundle is exposed to constant engine vibration which causes the individual wires to flex repeatedly at their connection points, leading to metal fatigue and eventual wire breakage. Uncontained wires can also contact hot surfaces such as the exhaust manifold, melting the insulation and causing short circuits, or get caught in rotating components causing complete harness failure. These failures manifest as intermittent sensor faults, ECU error codes, loss of safety systems such as ABS and traction control, and in severe cases engine fires — all of which pose serious safety risks and result in costly field recalls. Traditional human inspection of this assembly is unreliable because subtle defects such as a slightly displaced hoop or a missing clip are difficult to spot consistently at production line speeds, and inspector performance degrades over a shift due to fatigue. Human inspection also produces no digital record, making it impossible to track defect trends or demonstrate compliance during quality audits. An ML-based inspection system addresses all of these limitations — it applies the same detection logic consistently to every image regardless of time of day or operator, processes images in seconds without slowing the production line, generates a full audit trail of every inspection decision with anomaly scores and annotated images, and can detect subtle surface defects that the human eye routinely misses.
+Orange Wires (2 wires)
+Orange is commonly used in automotive wiring for high current or high importance circuits. In this location on the engine block near the cylinder head these are most likely:
+
+Fuel injector power supply wires — carrying switched 12V power to the fuel injectors on each cylinder bank
+Or oxygen sensor heater wires — powering the heating element inside the lambda/O2 sensor to bring it to operating temperature quickly
+
+
+Yellow Wire (1 wire)
+Yellow in automotive wiring typically represents:
+
+Crankshaft position sensor signal wire — sending the rotational position pulse to the ECU for ignition timing and fuel injection synchronisation
+Or camshaft position sensor signal — used by the ECU to identify which cylinder is on its compression stroke for sequential fuel injection
+
+
+Green Wire (1 wire)
+Green is commonly used for:
+
+Sensor signal return or ground reference wire — providing a clean ground reference for sensor circuits
+Or knock sensor signal wire — carrying the vibration signal from the knock sensor to the ECU so it can retard ignition timing to prevent engine damage
+
+
+Foil Wrapped Section (right side)
+The silver foil sheathing on the right portion of the bundle is thermal insulation wrapping — used when wires must pass close to the exhaust manifold or turbocharger. This confirms the bundle is routed near a significant heat source and the wires inside are likely:
+
+Oxygen sensor wiring — which must run from the ECU all the way to the exhaust manifold where the sensor is mounted
+Or EGT (Exhaust Gas Temperature) sensor wiring in turbocharged applications
+
+
+Why the Blue Hoop and Clips Matter Here
+Given these wires are carrying critical sensor signals to the ECU:
+WireIf damaged or looseFuel injector wireCylinder misfires, rough running, increased emissionsCrankshaft sensor wireEngine stalls, fails to start, limp modeKnock sensor wireEngine damage from undetected knock, reduced powerO2 sensor wireRich/lean fuel mixture, high emissions, catalytic converter damage
+All of these are safety and emissions critical circuits — making the correct containment of this bundle between the two clips and hoop not just an assembly quality issue but a direct vehicle safety and regulatory compliance requirement.
