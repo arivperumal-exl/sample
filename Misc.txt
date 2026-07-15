@@ -1,67 +1,7 @@
-# AI-Driven Visual Inspection for Engine Wire Harness Assembly
-### A Pitch for Automotive OEMs and Tier 1 Suppliers
+Practical checklist
 
----
-
-## THE PROBLEM
-
-Every car on the road today relies on a precise network of wire harnesses to keep its engine alive. Take the fuel injector circuit alone — a single orange power wire delivering current to each injector, a yellow CMP signal wire feeding real-time camshaft position data to the ECU, a green sensor return wire completing the loop. Each wire must be correctly routed, clipped at defined intervals, and secured with retention hoops at exact positions along the harness. Get any one of these wrong and the consequences range from an intermittent misfire to a full engine shutdown — or worse, an electrical fault under the hood that a driver discovers 60,000 miles later.
-
-Today, the industry's answer to catching these defects is a person standing at a light table with a checklist and a continuity tester.
-
-The continuity tester confirms the circuit closes. It has no opinion on whether the clip is actually fastened or just resting in place. It cannot see that the retention hoop has shifted 15 millimetres from its specified position. It will pass the assembly as green and move it down the line.
-
-The human inspector is supposed to catch the physical side. And they do — some of the time. But wire harness inspection is one of the most cognitively demanding repetitive tasks in automotive manufacturing. An inspector checking harnesses at production rate sees hundreds of assemblies per shift, each one a dense tangle of identically coloured wires, clips, and fasteners. Defect rates from manual inspection hover between 60 and 75 percent detection on a good day. By the end of an eight-hour shift, that number is lower. Nobody knows exactly how much lower, because the inspection process produces no data.
-
-The ones that slip through are expensive. A rework at the assembly station costs minutes. The same defect found at the vehicle plant after installation costs hours. A warranty claim costs thousands. A recall costs tens of millions — and it costs the brand something that cannot be invoiced: trust.
-
----
-
-## THE OPPORTUNITY
-
-The global automotive wire harness market produces over 4 billion harness assemblies annually. Electrical faults are the single largest category of automotive warranty claims — consistently above 20 percent of total warranty spend across major OEMs. A significant portion of those claims trace back to physical assembly errors that were never electrical failures at the point of manufacture — they became electrical failures later, under the stress of heat cycling, engine vibration, and time.
-
-The defect is not in the wire. The defect is in the assembly. And the assembly can be seen — if you have a system that knows what correct looks like.
-
----
-
-## THE SOLUTION
-
-We have built an AI-driven visual inspection system trained specifically on engine wire harness assemblies. The system learns from images of correctly assembled harnesses — no defect labelling required, no CAD model integration, no custom hardware beyond a standard industrial camera.
-
-At inspection time, the system runs three checks in under two seconds:
-
-**Anomaly Detection.** A PatchCore model compares each incoming image against a learned representation of normal assembly. Any deviation from the expected pattern — a missing clip, a displaced hoop, a kinked wire — produces an anomaly score and a pixel-level heatmap showing exactly where the deviation is located. The inspector sees not just a pass/fail verdict but a highlighted region pointing directly to the problem.
-
-**Structural Checks.** Beyond anomaly scoring, the system runs explicit structural rules on every image: are both retention clips present? Is the blue retention hoop detected? Is the hoop correctly positioned between the two clips, as IPC/WHMA-A-620 requires? Each check is independent. A harness can pass the anomaly score and still fail a structural check — and the system will catch it.
-
-**ROI-Focused Inspection.** The system concentrates its analysis on the assembly regions that matter — the clip zones, the hoop position, the wire routing path between the injector connectors and the ECU harness junction. Background area outside the region of interest contributes zero weight to the defect score, eliminating false positives from tooling shadows, fixture edges, and camera reflections.
-
----
-
-## THE IMPACT
-
-| | Manual Inspection | AI Visual Inspection |
-|---|---|---|
-| Detection rate | 60–75% | 95%+ |
-| Inspection time per unit | 45–90 seconds | < 2 seconds |
-| Consistency across shift | Degrades significantly | Constant |
-| Defect escape to vehicle plant | High | Near zero |
-| Audit trail | Paper checklist | Full image log, timestamped |
-| Rework cost avoidance | — | 8–12× return per defect caught |
-
-A single production line running 500 harnesses per shift, with a 2 percent physical defect rate and a 70 percent current detection rate, is letting 3 defective assemblies per shift escape to the vehicle plant. Each one that generates a warranty claim costs an average of $1,200 to resolve. That is $3,600 per shift, $18,000 per week, nearly $1 million per year — from one line, one harness type, one category of defect.
-
-The system pays for itself in weeks. What it delivers beyond that is a quality record, a process signal, and a defensible audit trail that manual inspection can never provide.
-
----
-
-## THE ASK
-
-We are looking to partner with a Tier 1 supplier or OEM ready to run a 90-day pilot on a live production line. We bring the trained model, the inspection software, and the integration support. You bring the line, the harness images, and the quality team. At the end of 90 days, you will have measured detection rates, escape rates, inspection cycle times, and a clear picture of the ROI on full deployment.
-
-The technology is proven. The economics are clear. The only question is which manufacturer moves first.
-
----
-
-*Built on PatchCore anomaly detection with EfficientNet backbone — the same architecture class used in production visual inspection systems at semiconductor fabs and consumer electronics assembly lines, now applied to the specific geometry and structural requirements of automotive engine wire harness inspection.*
+Confirm data quality tier (2 or 3) before trusting any results
+Use the console's Evaluate tab / Preview to sanity-check recommendations look reasonable for sample users/products
+Track coverage and diversity to catch popularity-bias problems early
+Instrument CTR, conversion, and revenue-per-impression in your own analytics (BigQuery + Looker Studio works well)
+Run a proper A/B test with a control group before declaring success — model-side metrics can look fine while business impact is flat
