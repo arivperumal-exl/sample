@@ -1,48 +1,53 @@
-Here's the full picture of how it works end-to-end, from raw data to a working model, and how you'd judge if it's good — specific to Recommendations AI (Retail API / Vertex AI Search for commerce).
+For a news company, you'd actually use Google's **Media Recommendations** app type (under Vertex AI Search / Agent Search) rather than the Retail model — it's a distinct product configuration built for content/media engagement instead of purchases. Here's how it maps to your case.
 
-## 1. What data Google ingests, per company
+## 1. What data you'd feed it
 
-Every company gets its own **isolated project and catalog** — models are trained only on that company's data, never mixed with other customers' data. Two data streams feed the model:
+**Content catalog** — instead of products, you'd import your articles: article ID, headline, category/topic, tags, author, publish timestamp, and description text.
 
-**Product catalog**
-- Core fields: product ID, title, category hierarchy, description, price, availability, images/URLs
-- Besides product ID, title, category hierarchy, and price, URLs are considered one of the primary fields used as inputs for model training.
-- **Custom attributes** — this is where it gets company-specific. Retailers can add up to thousands of their own product attributes (material, brand, size, style tags, etc.), and the system goes through all custom attributes for each retailer and chooses the most useful ones to add to the set of static product features, repeating this feature selection process roughly every 30 days. So a fashion retailer's model might end up weighting "fabric type" or "fit," while a hardware retailer's model weights "voltage" or "material grade" — Google auto-detects what's predictive for *your* catalog specifically.
-- The catalog should be kept up to date, ideally imported daily, since letting it go stale degrades model quality over time.
+**User events** — the relevant event types for a news app are different from retail:
+- `view-home-page` — user lands on the home feed
+- `view-item` — user opens an article
+- `media-play` — user starts reading/scrolling (used loosely for text, more literally for video/audio content)
+- `media-complete` — user finished/substantially consumed the article
 
-**User events**
-- Event types: homepage views, detail-page views, add-to-cart, purchase-complete, category-page-view, etc.
-- From these events, the system determines which products were clicked, added to cart, and purchased, and this data both trains the model as it gets more interaction and conversions and forms the basis for KPI measurement like revenue per user, CTR, and CVR.
-- To train against historical behavior, past site-engagement data typically needs to be backfilled and transformed into the prescribed event schema before continuous real-time events take over.
-- Some models require ingesting user event data for 60–90 days before they can even be trained.
+## 2. Which recommendation types apply
 
-## 2. What the model actually considers
+- **Recommended for You** — for the home page, predicts the next article a user is most likely to engage with based on their engagement history; if you use it on the home page, using Home Page Context as the event type gives better performance since it uses additional usage signals not available with the generic option
+- **Others You May Like** — for article detail pages, based on the user's engagement history and the current article being read
 
-For a given company, the model combines:
-- **Product-side features**: category, price, availability, plus the auto-selected custom attributes relevant to that catalog
-- **Behavioral signals**: each user's sequence of views/clicks/cart-adds/purchases
-- **Context**: page type, timestamp, device, filter tags
-- **Business rules layered on top**: you can manually boost/bury certain products, diversify results, or filter by tags/availability without retraining the model
+## 3. Optimization objective — this is the key decision for news
 
-Each model type (Others You May Like, Frequently Bought Together, Recommended for You, etc.) is trained toward one of **three optimization objectives**:
-- **Click-through rate** — maximize likelihood of a click
-- **Conversion rate** — maximize likelihood of purchase
-- **Revenue per session** — maximize expected revenue
+Media apps support three objectives:
+- **Click-through rate** — maximize the chance someone clicks into a recommended article
+- **Conversion rate** — defined by a completion threshold; for example, if the conversion threshold is set to 25%, the user meets the objective if they consume at least 25% of the content
+- **Watch/consumption duration per session** — maximizes total time spent, not just clicks
 
-This objective is chosen at training time and can't be changed after — you'd retrain a new model for a different objective.
+For a news company, CTR alone is a trap — it rewards clickbait headlines over substance. Conversion rate (with a completion threshold, e.g. "read past 50%") or duration-per-session is usually the better choice if what you actually care about is people reading, not just clicking and bouncing.
 
-Daily model retraining ensures the models stay accurate as new catalog and event data comes in.
+## 4. How to evaluate results — news-specific version
 
-## 3. How to evaluate it (tying together what we discussed before)
+**A. Standard model metrics** (recall@K, NDCG, coverage, diversity) still apply, but weight them differently for news:
+- **Coverage matters a lot more here** than in retail. If only your homepage top-5 stories ever get recommended, you have a serious filter-bubble / rich-get-richer problem where breaking or niche stories never surface.
+- **Diversity** is arguably your top risk metric. News recommenders that purely optimize engagement tend to converge on sensational or narrow-topic content — recommendation algorithms are designed to optimize time users spend on a platform by recommending content people are likely to engage with, and because users often gravitate to low-quality or sensationalist content, purely engagement-optimized systems can systematically amplify it. Track topic/category diversity per user over a week, not just per session.
 
-**A. Data quality gate first** — before judging the model at all, check the Data Quality dashboard. It's structured in 4 cumulative tiers, where data requirements are classified as Compliant, Performance Critical, or Upgrade Blocking for each tier. You need to clear these tiers, or any "evaluation" you do is really just measuring data gaps.
+**B. News-specific business metrics**
+- **CTR** on recommended slots vs. organic navigation
+- **Completion rate** (did they read past your threshold, not just click)
+- **Session depth** — average articles read per session with vs. without recommendations
+- **Return rate** — do users who get good recommendations come back the next day? This is often the real north star for a news product, more than single-session engagement.
+- **Time-to-stale** — how fast does yesterday's breaking news drop out of recommendations? News has a much faster content decay curve than retail products, so check whether the model is properly deprioritizing old articles (this ties back to keeping your catalog freshness/timestamp data accurate and imported frequently).
 
-**B. Model-side metrics**: Recall@K, NDCG, diversity, coverage (as discussed earlier).
+**C. Data quality checks specific to content freshness**
+- Since news articles have a short shelf life, verify the ingestion pipeline gets new articles into the catalog fast — recommending an article that's already stale by the time it surfaces is a quality failure specific to this vertical, unlike retail products which stay relevant for weeks/months.
+- Check the unjoined ratio (percentage of events referencing article IDs not yet in the catalog) — this is especially likely with breaking news published faster than your catalog import cycle.
 
-**C. Business metrics**: CTR, conversion rate, revenue per recommendation — all derivable from the user events you're already sending, since user events are the basis for KPI measurement including revenue per user, CTR, and CVR.
+**D. A/B testing setup**
+- Control group: chronological / editorially curated feed
+- Treatment: model-driven recommendations
+- Compare: CTR, completion rate, session depth, and — critically — **next-day return rate**, run over at least 1–2 weeks since news consumption patterns vary by day of week and news cycle
+- Also worth tracking: **topic diversity score** between control and treatment, so you can catch a filter-bubble effect even if engagement metrics look good
 
-**D. Attribution tokens** — a detail specific to this product worth knowing: attribution tokens enable performance metrics for recorded user events by capturing first-time user interactions with a product based on previously provided recommendations or search results. Without correctly threading the attribution token from a `predict` response into the follow-up click/purchase event, Google's own dashboard can't tell you which conversions came from recommendations vs. organic browsing — this is the single most common setup mistake that makes "the model isn't working" look true when it's actually a plumbing issue.
+## The core evaluation question for a news company
+Don't just ask "did engagement go up." Ask: **did we increase total meaningful reading (completions, return visits) without collapsing readers into a narrow set of topics or headlines?** A news recommender that boosts short-term CTR while shrinking topic diversity or completion rate is a common failure mode — it looks like a win on the dashboard and is actually a product and trust problem.
 
-**E. A/B testing** — the real verdict. Tag traffic with `experimentIds` in the predict request and compare a recommendation-served group against a control (e.g., "most popular" fallback or no personalization), only once the model is at Tier 3 data quality.
-
-If you want, I can map out a concrete evaluation plan (which events to backfill, which custom attributes to prioritize, how to wire attribution tokens) for a specific type of business you have in mind — retail, media, marketplace, etc. — since the "what to consider" part really does shift a lot by vertical.
+Want me to sketch out a sample event-tracking schema (JSON) for `view-item`/`media-complete` events tailored to an article reading flow, or a dashboard layout for tracking these metrics side by side?
