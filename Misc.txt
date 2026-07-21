@@ -1,42 +1,48 @@
-These results were mostly about generic Vertex AI model evaluation, not the Retail/Recommendations AI product specifically. Let me get the more targeted info.Good, now I have solid, specific info. Here's how to check if your Recommendations AI engine is actually working well:
+Here's the full picture of how it works end-to-end, from raw data to a working model, and how you'd judge if it's good — specific to Recommendations AI (Retail API / Vertex AI Search for commerce).
 
-## 1. Start with data quality (before you even judge the model)
-Bad recommendations are usually a data problem, not a model problem. Check the **Data Quality dashboard** in the console (Retail menu → Data Quality). It breaks performance issues into 4 cumulative tiers, where within each tier, data requirements are classified as Compliant, Performance Critical, or Upgrade Blocking. Make sure your model reaches at least Tier 2, preferably Tier 3, before doing any real A/B testing — a Tier 2 model quickly advances to Tier 3 with sufficient high-quality traffic, unlocking peak performance, and you should only run performance comparisons after the model achieves Tier 3, since that's its most optimized state.
+## 1. What data Google ingests, per company
 
-## 2. Model-level metrics
-There are two categories of metrics to track: model metrics (how well the model predicts) and business metrics (how well recommendations impact your bottom line). Key model metrics:
+Every company gets its own **isolated project and catalog** — models are trained only on that company's data, never mixed with other customers' data. Two data streams feed the model:
 
-- **Recall@K** — of all relevant items for a user, what fraction appeared in the top K recommendations — higher recall means the model covers more of the user's interests
-- **NDCG** — measures how well the model ranks relevant items, since items the user actually wants should appear at the top, not buried at position 10
-- **Diversity** — how varied the recommendations are; a model that always recommends the same popular items scores low on diversity
-- **Coverage** — what percentage of your catalog gets recommended to at least one user; low coverage means a large portion of your inventory is invisible
+**Product catalog**
+- Core fields: product ID, title, category hierarchy, description, price, availability, images/URLs
+- Besides product ID, title, category hierarchy, and price, URLs are considered one of the primary fields used as inputs for model training.
+- **Custom attributes** — this is where it gets company-specific. Retailers can add up to thousands of their own product attributes (material, brand, size, style tags, etc.), and the system goes through all custom attributes for each retailer and chooses the most useful ones to add to the set of static product features, repeating this feature selection process roughly every 30 days. So a fashion retailer's model might end up weighting "fabric type" or "fit," while a hardware retailer's model weights "voltage" or "material grade" — Google auto-detects what's predictive for *your* catalog specifically.
+- The catalog should be kept up to date, ideally imported daily, since letting it go stale degrades model quality over time.
 
-You can pull basic model status via the API:
-```python
-from google.cloud import retail_v2
-client = retail_v2.ModelServiceClient()
-model = client.get_model(name=model_name)
-print(model.training_state, model.serving_state, model.data_state)
-```
+**User events**
+- Event types: homepage views, detail-page views, add-to-cart, purchase-complete, category-page-view, etc.
+- From these events, the system determines which products were clicked, added to cart, and purchased, and this data both trains the model as it gets more interaction and conversions and forms the basis for KPI measurement like revenue per user, CTR, and CVR.
+- To train against historical behavior, past site-engagement data typically needs to be backfilled and transformed into the prescribed event schema before continuous real-time events take over.
+- Some models require ingesting user event data for 60–90 days before they can even be trained.
 
-## 3. Business metrics (the ones that actually matter to stakeholders)
-- **CTR** — percentage of recommended products that users click on
-- **Conversion rate** — percentage of clicked recommendations that lead to a purchase
-- **Revenue per recommendation** — average revenue generated per recommendation impression
+## 2. What the model actually considers
 
-You'll need to join impression logs with purchase/event data yourself (e.g., in BigQuery) since Recommendations AI doesn't hand you a revenue dashboard out of the box.
+For a given company, the model combines:
+- **Product-side features**: category, price, availability, plus the auto-selected custom attributes relevant to that catalog
+- **Behavioral signals**: each user's sequence of views/clicks/cart-adds/purchases
+- **Context**: page type, timestamp, device, filter tags
+- **Business rules layered on top**: you can manually boost/bury certain products, diversify results, or filter by tags/availability without retraining the model
 
-## 4. Coverage check (quick red flag test)
-A simple query pattern: compare distinct products recommended in the last 30 days vs. total in-stock catalog. Low coverage, below roughly 30%, suggests the model is stuck in a popularity bias, only recommending well-known products.
+Each model type (Others You May Like, Frequently Bought Together, Recommended for You, etc.) is trained toward one of **three optimization objectives**:
+- **Click-through rate** — maximize likelihood of a click
+- **Conversion rate** — maximize likelihood of purchase
+- **Revenue per session** — maximize expected revenue
 
-## 5. The real test: A/B testing
-The gold standard for evaluation is A/B testing — compare recommendations against a control group. Use the `experimentIds` field in your predict requests to tag traffic into experiment groups, then compare CTR/conversion/revenue between the recommendation-served group and a baseline (e.g., "most popular" or no personalization).
+This objective is chosen at training time and can't be changed after — you'd retrain a new model for a different objective.
 
-## Practical checklist
-1. Confirm data quality tier (2 or 3) before trusting any results
-2. Use the console's **Evaluate tab / Preview** to sanity-check recommendations look reasonable for sample users/products
-3. Track coverage and diversity to catch popularity-bias problems early
-4. Instrument CTR, conversion, and revenue-per-impression in your own analytics (BigQuery + Looker Studio works well)
-5. Run a proper A/B test with a control group before declaring success — model-side metrics can look fine while business impact is flat
+Daily model retraining ensures the models stay accurate as new catalog and event data comes in.
 
-Want me to sketch out a BigQuery query template for tracking CTR/conversion from your impression and event logs?
+## 3. How to evaluate it (tying together what we discussed before)
+
+**A. Data quality gate first** — before judging the model at all, check the Data Quality dashboard. It's structured in 4 cumulative tiers, where data requirements are classified as Compliant, Performance Critical, or Upgrade Blocking for each tier. You need to clear these tiers, or any "evaluation" you do is really just measuring data gaps.
+
+**B. Model-side metrics**: Recall@K, NDCG, diversity, coverage (as discussed earlier).
+
+**C. Business metrics**: CTR, conversion rate, revenue per recommendation — all derivable from the user events you're already sending, since user events are the basis for KPI measurement including revenue per user, CTR, and CVR.
+
+**D. Attribution tokens** — a detail specific to this product worth knowing: attribution tokens enable performance metrics for recorded user events by capturing first-time user interactions with a product based on previously provided recommendations or search results. Without correctly threading the attribution token from a `predict` response into the follow-up click/purchase event, Google's own dashboard can't tell you which conversions came from recommendations vs. organic browsing — this is the single most common setup mistake that makes "the model isn't working" look true when it's actually a plumbing issue.
+
+**E. A/B testing** — the real verdict. Tag traffic with `experimentIds` in the predict request and compare a recommendation-served group against a control (e.g., "most popular" fallback or no personalization), only once the model is at Tier 3 data quality.
+
+If you want, I can map out a concrete evaluation plan (which events to backfill, which custom attributes to prioritize, how to wire attribution tokens) for a specific type of business you have in mind — retail, media, marketplace, etc. — since the "what to consider" part really does shift a lot by vertical.
