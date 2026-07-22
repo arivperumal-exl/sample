@@ -1,21 +1,31 @@
-Here's the expanded list — covering everything from today (July 22, 2026) through mid-2027, including a few that were only just announced.
+Here's an expanded set — adding several more that fit your criteria, some newly surfaced, plus a couple of niche technical congresses I hadn't covered yet.
+
+## Newly Added Conferences
 
 | Conference Name | Link | Major OEMs/Companies Attending | Main Focus | Location | Date | Cost per Person |
 |---|---|---|---|---|---|---|
-| **SIAM Annual Convention (66th)** | [siam.in](https://www.siam.in/) | Maruti Suzuki, Tata Motors, Mahindra, Toyota Kirloskar, Bajaj, TVS, Ashok Leyland | India's automotive sector strategy, sustainable mobility, software-defined vehicles | New Delhi, India | Sept 3, 2026 | Invite/member-based; not publicly listed |
-| **SAE COMVEC 2026** | [comvec.sae.org](https://comvec.sae.org/) | John Deere, CNH, AGCO, Caterpillar, Daimler Truck, Volvo Trucks, PACCAR — the on-highway/off-highway/ag/construction engineering community | Vehicles and equipment spanning on-highway, off-highway, agricultural, construction, industrial, and defense sectors — a rare event bridging **automotive AND farm/construction equipment** engineering | Schaumburg, Illinois, USA | Sept 29 – Oct 1, 2026 | Not yet published; SAE technical congresses historically ~$1,200–$1,800 (member discount available) |
-| **AEM Annual Conference 2026** | [aem.org/events/conferences-and-webinars/annual-conference](https://www.aem.org/events/conferences-and-webinars/annual-conference) | John Deere, CNH Industrial, AGCO, Kubota, Caterpillar, Mahindra North America | Leadership and strategic outlook for the off-road (agriculture + construction) equipment manufacturing industry | Tucson, Arizona, USA | Nov 10–12, 2026 | Members-only; fee TBA (registration opens June 2026) |
-| **Rockwell Automation Fair 2026** | [rockwellautomation.com/events/automation-fair](https://www.rockwellautomation.com/en-us/events/automation-fair.html) | Rockwell Automation, Cisco, Fortinet, PTC + partner network; attended by automotive/industrial/farm-equipment plant engineers | Industrial automation, IT/OT convergence, AI-driven manufacturing, with off-site plant tours | Boston, Massachusetts, USA | Nov 16–19, 2026 | Registration opens Aug 2026; historically ~$1,000–$1,300 (General Access) |
-| **ASABE Annual International Meeting (AIM) 2026** | [asabeaim.org](https://asabeaim.org/) | Engineers from John Deere, CNH Industrial, AGCO, Kubota alongside academic/research community | Machinery systems, precision ag, ag equipment design and technology innovation — engineering-research focused, not a public product showcase | Indianapolis, Indiana, USA | July 12–15, 2026 | Non-member ~$900–$1,100 est.; member rate lower (final pricing on site) |
-| **ACMA Annual Session (67th, expected)** *(not yet formally announced — based on consistent Sept pattern)* | [acma.in](https://www.acma.in/) | Bosch, Motherson, Sona Comstar, Bharat Forge, and other ACMA member Tier-1s + OEM guests | Auto component industry outlook, policy, and technology direction for India | New Delhi, India | Expected ~Sept 2026 (unconfirmed — 65th was Sept 11, 2025) | Not yet published |
-| **SAE WCX (World Congress Experience) 2027** | [sae.org/events/wcx](https://www.sae.org/events/wcx) | Ford, Stellantis, GM, and global Tier-1 suppliers; ~3,000 delegates | Full-vehicle mobility engineering — hardware, software, regulatory standards, and emerging tech | Detroit, Michigan, USA | Apr 27–29, 2027 (some listings show Apr 28 — dates still firming up) | Not yet published; 2026 edition ran ~$1,400–$1,900 for non-members |
+| **23rd Asia Pacific Automotive Engineering Conference (APAC)** | [saeindia.org](https://saeindia.org) | Maruti Suzuki, Tata Motors, Mahindra, Hyundai India, Bosch, Continental — SAEINDIA's flagship OEM/engineering event | Automotive engineering across Asia-Pacific — EVs, ADAS, software-defined vehicles, powertrain | New Delhi, India | Nov 12–14, 2026 | Not yet published (SAE conference fees typically ₹15,000–₹40,000 / $200–$500 for delegates) |
+| **ARC Industry Leadership Forum 2027** | [arcweb.com/events/arc-industry-leadership-forum-orlando](https://www.arcweb.com/events/arc-industry-leadership-forum-orlando) | Honeywell, AVEVA, Schneider Electric, Rockwell, plus end-users from automotive/farm equipment plants | AI and Physical AI in industrial operations, automation, robotics, and autonomous operations | Orlando, Florida, USA | Feb 22–25, 2027 | Not yet published; past editions ~$2,000–$2,600 |
+| **AutoTech 2027** (rebranded from TU-Automotive Detroit) | [autotechevents.com](https://autotechevents.com/home/) | Ford, GM, Stellantis, Panasonic Automotive, Visteon, Tier-1 connected-car suppliers | Connected mobility, ADAS, software-defined vehicles, in-cabin AI/UX | Novi, Michigan, USA | June 22–23, 2027 | Not yet published; historically ~$2,000–$3,000 for industry delegate passes |
+| **SAENIS TTTMS International Conference (Thermal Management Systems)** | [saenis.glueup.com](https://saenis.glueup.com) | Automotive OEM thermal/powertrain engineering teams (Tata, M&M, Ashok Leyland suppliers) | Technological advancements in thermal management systems for automotive applications — niche but genuine OEM engineering forum | New Delhi, India (per SAEINDIA calendar) | Dec 2026 (9th edition, exact dates TBA) | Not yet published |
+| **ADMMS 2027** (SAEINDIA Southern Section) | [saeiss.org](https://www.saeiss.org/professional) | Regional automotive/aerospace manufacturing engineers and OEM suppliers | Sustainable mobility solutions, digital transformation, next-generation manufacturing processes | Salem, Tamil Nadu, India | Feb 6, 2027 | Not yet published |
 
-**Notes and honest caveats:**
-- **Newly announced / just happened:** The **ACMA Mobility Foundation Cluster Conference 2026** in Pune (a capability-showcase-style event on automotive supply chain excellence) just took place, bringing together policymakers, vehicle manufacturers, and auto component makers — but since it already occurred (within the last ~2 weeks per search results), I've excluded it from the "upcoming" table; flagging in case ACMA runs a similar edition again before mid-2027.
-- **SIAT (ARAI's flagship automotive tech symposium)** is biennial and just held its 19th edition in **Jan 2026** — the next one won't fall until **Jan 2028**, so it's outside your mid-2027 window.
-- **InfoAg 2026** (precision ag) already occurred in late June 2026, before your current date — excluded.
-- I could not find a confirmed **India-specific farm equipment capability showcase (non-expo)** for this window — India's farm equipment events (AFEILE, Farm Equipment Expo) are structured as expos. If you're open to a hybrid (conference-track co-located with a trade floor), I can pull those in a follow-up.
-- Costs are the weakest data point across the board — several of these (AEM, Rockwell, ACMA, WCX 2027) haven't opened registration yet, so I've given historical pricing as a proxy rather than inventing a number.
-- Bharat Mobility Global Expo returns **Feb 4–9, 2027** in Delhi NCR, but it's explicitly expo-format (not included per your criteria) — let me know if you want it added anyway for coverage.
+## Quick recap of what's still relevant from earlier (for one consolidated view)
 
-Want me to keep monitoring and refresh this list monthly, or turn it into a downloadable tracker (Excel) with an alert column for registration-opening dates?
+| Conference | Location | Date |
+|---|---|---|
+| ASABE Annual International Meeting (AIM) 2026 | Indianapolis, USA | July 12–15, 2026 |
+| SIAM Annual Convention (66th) | New Delhi, India | Sept 3, 2026 |
+| SAE COMVEC 2026 | Schaumburg, USA | Sept 29–Oct 1, 2026 |
+| AEM Annual Conference 2026 | Tucson, USA | Nov 10–12, 2026 |
+| Rockwell Automation Fair 2026 | Boston, USA | Nov 16–19, 2026 |
+| SAE WCX 2027 | Detroit, USA | ~Apr 27–29, 2027 |
+
+**A few honest notes:**
+- **APAC** is probably the single best addition — it's SAEINDIA's flagship OEM-heavy automotive engineering event and squarely fits your "capability showcase, not expo" ask.
+- **TTTMS** and **ADMMS** are real but niche/regional — good if you want automotive engineering depth in India beyond the big national events, but they're smaller-scale (hundreds, not thousands, of attendees).
+- **ARC Industry Leadership Forum** is the strongest pure-"Industrial" pick I've found — it's analyst-led (not vendor trade-floor driven) and directly relevant if your industrial-firm audience includes plant operations/automation leaders.
+- I still haven't found a **non-expo farm equipment capability showcase specific to India** — that gap persists. If useful, I can check for OEM-hosted private "innovation days" (John Deere, Mahindra, CNH) which sometimes run customer-only tech showcases not publicly listed on conference calendars — those would need direct outreach to each company's India/US media relations team rather than search.
+- Cost data remains thin for 2027 events since most haven't opened registration — flagging rather than guessing.
+
+Want me to try tracking down OEM-private (invitation-only) innovation days next, or convert this whole running list into a spreadsheet you can filter/sort?
