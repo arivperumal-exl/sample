@@ -1,0 +1,17 @@
+supplier_id,supplier_name,country,region,primary_commodity,supplier_tier,onboard_date,risk_rating,esg_score
+SUP-001,Silverline Sands Inc,USA,North America,Silica Sand,Strategic,2019-03-11,Low,88
+SUP-002,Great Lakes Soda Ash Co,U.S.A,North America,Soda Ash,Strategic,2018-07-01,Low,88
+SUP-003,Dolomite Direct LLC,United States,North America,Dolomite,Preferred,2020-01-15,Low,80
+SUP-004,Appalachian Limestone Corp,United States,North America,Limestone,Preferred,2017-11-20,Low,80
+SUP-005, GreenCullet Recycling,United States,North America,Cullet,Approved,2021-05-05,Medium,68
+SUP-006,Rhine Minerals GmbH,Germany,Europe,Soda Ash,Preferred,2016-09-30,Low,80
+SUP-007,Iberian Silica SA,spain ,Europe,Silica Sand,Approved,2022-02-14,Medium,68
+SUP-008,Nordic SaltCake AB,Sweden,Europe,Salt Cake,Approved,2020-08-19,Medium,68
+SUP-009,Zhejiang Coatings Ltd,China,Asia Pacific,Coatings,Approved,2023-01-10,High,52
+SUP-010,Bharat Minerals Pvt Ltd,India,Asia Pacific,Dolomite,Approved,2021-11-02,Medium,68
+SUP-011,Volga Cullet Traders,Poland,Europe,Cullet,Conditional,2023-06-25,High,52
+SUP-012,PackRight Industrial,Mexico,North America,Packaging,Approved,2019-10-08,Low,80
+SUP-013,,UAE,Middle East,Silica Sand,Conditional,2024-01-22,High,52
+SUP-014,Continental Limestone GmbH,DE,Europe,Limestone,Preferred,2018-04-17,Low,80
+SUP-009,Zhejiang Coatings Ltd,China,Asia Pacific,Coatings,Preferred,2023-01-10,Low,90
+SUP-902,Great Lakes Soda-Ash Company,U.S.A,North America,Soda Ash,Strategic,2018-07-01,Low,88

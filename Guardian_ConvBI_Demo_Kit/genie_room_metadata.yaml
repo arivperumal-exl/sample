@@ -1,0 +1,217 @@
+# Genie / Cortex Room Metadata — Guardian Supplier Scorecard (Medallion demo)
+# Genie/Cortex should query the GOLD marts. Silver is included for lineage/curiosity only.
+# Paste table & column descriptions + synonyms into the room; apply guardrails as custom instructions.
+room:
+  name: Guardian Supplier Scorecard (Conversational BI Demo)
+  primary_layer: gold
+  description: >
+    Supplier performance & supply-chain analytics for float-glass raw materials.
+    Medallion: Silver atomic events -> Gold aggregated marts. Chat reads Gold.
+  global_instructions:
+    - Answer from the GOLD marts (gold_*). Use Silver only if explicitly asked to drill to events.
+    - Never SUM quantities across different unit_of_measure (MT/KG/EA).
+    - otd_pct / otif_pct / supply_fill_rate_pct are PERCENT (0-100), never fractions.
+    - overall_score is the single supplier rating basis; supplier_rating is its letter grade. Ignore any second rating column.
+    - defect_ppm is bounded 0..1,000,000; treat out-of-range as data errors.
+    - Spend = SUM(total_spend_usd) from gold_spend_analysis_monthly, in USD; exclude non-USD.
+    - gold_supplier_summary must reconcile with gold_spend_analysis_monthly and gold_supplier_scorecard_monthly.
+    - Enforce referential integrity: flag orphan supplier/material/PO keys before aggregating.
+layers:
+  silver: [silver_dim_supplier, silver_dim_plant, silver_dim_material, silver_dim_date, silver_purchase_order_lines, silver_goods_receipts, silver_quality_inspections, silver_inventory_movements]
+  gold:   [gold_supplier_scorecard_monthly, gold_spend_analysis_monthly, gold_inventory_snapshot_monthly, gold_demand_supply_monthly, gold_supplier_summary]
+tables:
+  - name: silver_dim_supplier
+    layer: silver
+    columns:
+      - column: supplier_id
+        description: Unique supplier id
+        synonyms: [vendor id, supplier code]
+        guardrail: PK; format SUP-###
+      - column: supplier_name
+        description: Supplier trading name
+        synonyms: [vendor, supplier]
+        guardrail: Trim whitespace; dedupe near-matches (MDM)
+      - column: country / region
+        description: Supplier geography
+        synonyms: [nation, geo, area]
+        guardrail: Standardise to ISO names; 5-region list
+      - column: primary_commodity
+        description: Main commodity supplied
+        synonyms: [material group]
+        guardrail: Join hint to material.commodity
+      - column: supplier_tier / risk_rating / esg_score
+        description: Segmentation, risk band, ESG 0-100
+        synonyms: [classification, risk, sustainability]
+        guardrail: Controlled lists; higher ESG better
+  - name: silver_dim_material
+    layer: silver
+    columns:
+      - column: material_id
+        description: Unique material/SKU id
+        synonyms: [part id, sku, item]
+        guardrail: PK; format MAT-###
+      - column: commodity
+        description: Commodity family
+        synonyms: [category, material group]
+        guardrail: Controlled list; drives spend-by-commodity
+      - column: unit_of_measure
+        description: Base UoM (MT/KG/EA)
+        synonyms: [uom, unit]
+        guardrail: NEVER sum quantities across differing UoM
+      - column: standard_price_usd
+        description: Standard cost per UoM (USD)
+        synonyms: [std cost, list price]
+        guardrail: Baseline for PPV; currency = USD
+  - name: silver_dim_plant
+    layer: silver
+    columns:
+      - column: plant_id + location
+        description: Plant id & location hierarchy
+        synonyms: [site, factory]
+        guardrail: PK PLT-##; roll up by region
+  - name: silver_dim_date
+    layer: silver
+    columns:
+      - column: date_key
+        description: Month key YYYYMM
+        synonyms: [period, month]
+        guardrail: PK; join to fact date_key
+  - name: silver_purchase_order_lines
+    layer: silver
+    columns:
+      - column: po_id
+        description: PO line id (order-placed event)
+        synonyms: [PO number, order id]
+        guardrail: PK
+      - column: order_date
+        description: Date PO raised
+        synonyms: [order placed]
+        guardrail: Single ISO format YYYY-MM-DD
+      - column: order_qty / unit_price_usd / po_value_usd
+        description: Qty, price/UoM, extended value (USD)
+        synonyms: [volume, price, order value]
+        guardrail: qty>0; numeric only; USD
+      - column: promised_delivery_date
+        description: Supplier-committed date
+        synonyms: [promised, ETA]
+        guardrail: Must be ≥ order_date
+  - name: silver_goods_receipts
+    layer: silver
+    columns:
+      - column: grn_id / po_id
+        description: Receipt event & parent PO
+        synonyms: [receipt, GRN]
+        guardrail: grn_id PK; po_id must exist (3-way match)
+      - column: received_date
+        description: Actual receipt date
+        synonyms: [delivery date]
+        guardrail: Required for OTD; ISO format
+      - column: received_qty
+        description: Quantity received (UoM)
+        synonyms: [qty received]
+        guardrail: ≥0; UoM-aware
+      - column: delivery_status / fulfillment_status
+        description: On-Time/Late & In-Full/Short
+        synonyms: [otd flag, otif flag]
+        guardrail: Controlled values (no 'ontime')
+  - name: silver_quality_inspections
+    layer: silver
+    columns:
+      - column: inspection_id / grn_id
+        description: Inspection sample & parent receipt
+        synonyms: [QA id, sample]
+        guardrail: inspection_id PK; grn_id must exist
+      - column: inspected_qty / defect_qty
+        description: Sampled qty & defects found
+        synonyms: [QA qty, defects]
+        guardrail: defect_qty ≤ inspected_qty
+      - column: defect_ppm
+        description: Defects per million
+        synonyms: [ppm, defect rate]
+        guardrail: Range 0..1,000,000; lower better
+      - column: defect_category
+        description: Defect type
+        synonyms: [reason, category]
+        guardrail: Controlled Pareto list; consistent casing
+  - name: silver_inventory_movements
+    layer: silver
+    columns:
+      - column: movement_id
+        description: Stock ledger event id
+        synonyms: [txn id]
+        guardrail: PK
+      - column: movement_type / quantity
+        description: Receipt/Issue & signed qty
+        synonyms: [stock in/out]
+        guardrail: Receipts +ve, Issues -ve; aggregates to snapshot
+  - name: gold_supplier_scorecard_monthly
+    layer: gold
+    columns:
+      - column: date_key / supplier_id
+        description: Scorecard grain keys
+        synonyms: [period, supplier]
+        guardrail: Composite PK; one row per supplier-month
+      - column: otd_pct
+        description: On-Time Delivery %
+        synonyms: [on time %, reliability]
+        guardrail: PERCENT 0-100 (never a fraction)
+      - column: otif_pct
+        description: On-Time In-Full %
+        synonyms: [otif, perfect order]
+        guardrail: Percent 0-100
+      - column: defect_ppm
+        description: Avg defect PPM (from inspections)
+        synonyms: [quality, ppm]
+        guardrail: 0..1,000,000; lower better
+      - column: ppv_pct
+        description: Purchase price variance %
+        synonyms: [price variance]
+        guardrail: +ve = paid over standard
+      - column: overall_score
+        description: Weighted score (Del30/Qual30/Cost20/Resp20)
+        synonyms: [supplier score]
+        guardrail: THE headline KPI; 0-100
+      - column: supplier_rating
+        description: Letter grade from overall_score
+        synonyms: [grade]
+        guardrail: SINGLE rating source (don't add a 2nd)
+  - name: gold_spend_analysis_monthly
+    layer: gold
+    columns:
+      - column: total_spend_usd
+        description: Spend = SUM(po_value_usd)
+        synonyms: [spend, purchases]
+        guardrail: USD only; excludes non-USD rows
+      - column: commodity / total_qty
+        description: Commodity & UoM-aware qty
+        synonyms: [material group, volume]
+        guardrail: Don't sum qty across UoM
+  - name: gold_inventory_snapshot_monthly
+    layer: gold
+    columns:
+      - column: on_hand_qty
+        description: Month-end stock (running balance)
+        synonyms: [inventory, stock]
+        guardrail: Derived from movements; ≥0
+      - column: days_of_cover / stock_status
+        description: Cover & Healthy/Below Safety
+        synonyms: [DOS, stockout flag]
+        guardrail: Derived from on_hand vs safety
+  - name: gold_demand_supply_monthly
+    layer: gold
+    columns:
+      - column: forecast/actual/supply qty
+        description: Planning demand vs supply
+        synonyms: [forecast, usage, supply]
+        guardrail: Same UoM per material
+      - column: supply_fill_rate_pct
+        description: Supply ÷ demand ×100
+        synonyms: [service level, fill rate]
+        guardrail: Range 0-100
+  - name: gold_supplier_summary
+    layer: gold
+    columns:
+      - column: total_spend_usd / avg_overall_score
+        description: All-time supplier rollup
+        synonyms: [total spend, avg score]
+        guardrail: Must reconcile with spend & scorecard marts

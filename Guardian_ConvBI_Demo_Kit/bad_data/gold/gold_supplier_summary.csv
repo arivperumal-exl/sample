@@ -1,0 +1,16 @@
+supplier_id,supplier_name,supplier_tier,risk_rating,total_spend_usd,total_deliveries,avg_otd_pct,avg_otif_pct,avg_defect_ppm,avg_overall_score
+SUP-001,Silverline Sands Inc,Strategic,Low,598570.77,40,92.4,98.1,115.84615384615384,98.7
+SUP-002,Great Lakes Soda Ash Co,Strategic,Low,3792906.19,35,100.0,100.0,118.58333333333333,99.3
+SUP-003,Dolomite Direct LLC,Preferred,Low,588482.38,36,90.5,86.0,473.4166666666667,90.6
+SUP-004,Appalachian Limestone Corp,Preferred,Low,641677.0,35,76.3,92.8,417.9166666666667,92.7
+SUP-005, GreenCullet Recycling,Approved,Medium,430383.93,45,83.3,75.0,1526.3846153846155,81.1
+SUP-006,Rhine Minerals GmbH,Preferred,Low,4572175.0,36,90.5,96.2,48543.230769230766,91.5
+SUP-007,Iberian Silica SA,Approved,Medium,883251.0,40,76.3,68.6,46138.92857142857,77.3
+SUP-008,Nordic SaltCake AB,Approved,Medium,2614092.67,36,92.9,78.6,1416.1538461538462,80.2
+SUP-009,Zhejiang Coatings Ltd,Approved,High,4696129.9,34,85.3,68.3,4774.307692307692,125.8
+SUP-010,Bharat Minerals Pvt Ltd,Approved,Medium,623938.11,39,86.7,81.5,1557.076923076923,82.2
+SUP-011,Volga Cullet Traders,Conditional,High,360835.39,35,63.3,61.1,5406.25,56.5
+SUP-012,PackRight Industrial,Approved,Low,289562.87,33,91.1,91.1,83759.6,90.2
+SUP-013,,Conditional,High,718443.31,32,75.5,67.1,4558.333333333333,62.2
+SUP-014,Continental Limestone GmbH,Preferred,Low,496753.44,36,93.1,88.2,469.5833333333333,91.5
+SUP-555,,,,,16,50.3,80.0,1297.8,84.2

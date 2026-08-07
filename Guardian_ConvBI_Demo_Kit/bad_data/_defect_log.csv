@@ -1,0 +1,175 @@
+defect_id,layer,recommended_catch_point,table,column,row_key,defect_family,defect_type,good_value,bad_value,how_it_breaks_conversational_bi
+DFT-001,Silver,Silver DQ gate,silver_dim_supplier,country,SUP-001,E - Inconsistent encoding,Inconsistent categorical encoding,United States,USA,Suppliers-by-country grouping splits US into 3 buckets
+DFT-002,Silver,Silver DQ gate,silver_dim_supplier,country,SUP-002,E - Inconsistent encoding,Inconsistent categorical encoding,United States,U.S.A,Suppliers-by-country grouping splits US into 3 buckets
+DFT-003,Silver,Silver DQ gate,silver_dim_supplier,country,SUP-007,E - Inconsistent encoding,Inconsistent categorical encoding,Spain,spain ,Suppliers-by-country grouping splits US into 3 buckets
+DFT-004,Silver,Silver DQ gate,silver_dim_supplier,country,SUP-014,E - Inconsistent encoding,Inconsistent categorical encoding,Germany,DE,Suppliers-by-country grouping splits US into 3 buckets
+DFT-005,Silver,Silver DQ gate,silver_dim_supplier,supplier_name,SUP-005,E - Inconsistent encoding,Leading/trailing whitespace,GreenCullet Recycling, GreenCullet Recycling,Name joins/filters miss the row
+DFT-006,Silver,Silver dedup/MDM,silver_dim_supplier,supplier_id,SUP-009,D - Duplicate/contradictory,"Duplicate key, contradictory attributes",Approved/High,Preferred/Low (2nd row),Risk & tier questions conflict; joins fan-out & double count
+DFT-007,Silver,Silver MDM (entity resolution),silver_dim_supplier,supplier_id,SUP-002/SUP-902,F - Functional/semantic,"Semantic duplicate entity (two IDs, one supplier)",single supplier,split across SUP-002 & SUP-902,True spend/perf for Great Lakes split in half -> undercount
+DFT-008,Silver,Silver DQ gate,silver_dim_supplier,supplier_name,SUP-013,C - Missing data,Missing value,Sahara Sand Trading FZE,<null>,Blank supplier in rankings
+DFT-009,Silver,Silver DQ gate,silver_dim_material,commodity,MAT-102,E - Inconsistent encoding,Inconsistent casing/spacing,Soda Ash,soda ash,Spend-by-commodity splits Soda Ash/soda ash
+DFT-010,Silver,Silver DQ gate,silver_dim_material,commodity,MAT-105,E - Inconsistent encoding,Inconsistent casing/spacing,Cullet,CULLET,Spend-by-commodity splits Soda Ash/soda ash
+DFT-011,Silver,Silver DQ gate,silver_dim_material,commodity,MAT-101,E - Inconsistent encoding,Inconsistent casing/spacing,Silica Sand,Silica  Sand,Spend-by-commodity splits Soda Ash/soda ash
+DFT-012,Silver,Silver DQ gate,silver_dim_material,standard_price_usd,MAT-107,A - Value defects,Negative price,145,-145,PPV/spend go negative for coatings
+DFT-013,Silver,Silver DQ gate,silver_dim_material,unit_of_measure,MAT-110,C - Missing data,Missing UoM,KG,<null>,Quantity roll-ups mix units
+DFT-014,Silver,Silver DQ gate,silver_dim_plant,country,PLT-05,E - Inconsistent encoding,Inconsistent encoding,United Kingdom,UK,Plants-by-country splits UK
+DFT-015,Silver,Silver DQ gate,silver_dim_plant,region,PLT-06,C - Missing data,Missing region,Europe,<null>,By-region grouping drops a plant
+DFT-016,Silver,Silver DQ gate,silver_purchase_order_lines,order_qty,PO-1444,A - Value defects,Negative quantity,595,-595,SUM(order_qty) understated
+DFT-017,Silver,Silver DQ gate,silver_purchase_order_lines,order_qty,PO-1344,A - Value defects,Negative quantity,503,-503,SUM(order_qty) understated
+DFT-018,Silver,Silver DQ gate,silver_purchase_order_lines,order_qty,PO-1047,A - Value defects,Negative quantity,80,-80,SUM(order_qty) understated
+DFT-019,Silver,Silver DQ gate,silver_purchase_order_lines,order_qty,PO-1067,A - Value defects,Negative quantity,368,-368,SUM(order_qty) understated
+DFT-020,Silver,Silver DQ gate,silver_purchase_order_lines,order_qty,PO-1363,A - Value defects,Negative quantity,880,-880,SUM(order_qty) understated
+DFT-021,Silver,Silver DQ gate,silver_purchase_order_lines,order_qty,PO-1132,A - Value defects,Negative quantity,410,-410,SUM(order_qty) understated
+DFT-022,Silver,Silver DQ gate,silver_purchase_order_lines,promised_delivery_date,PO-1352,A - Value defects,Promised precedes order,2025-10-24,2024-12-01,Negative lead times
+DFT-023,Silver,Silver DQ gate,silver_purchase_order_lines,promised_delivery_date,PO-1297,A - Value defects,Promised precedes order,2025-09-12,2024-12-01,Negative lead times
+DFT-024,Silver,Silver DQ gate,silver_purchase_order_lines,promised_delivery_date,PO-1300,A - Value defects,Promised precedes order,2025-08-22,2024-12-01,Negative lead times
+DFT-025,Silver,Silver DQ gate,silver_purchase_order_lines,promised_delivery_date,PO-1423,A - Value defects,Promised precedes order,2025-10-28,2024-12-01,Negative lead times
+DFT-026,Silver,Silver DQ gate,silver_purchase_order_lines,promised_delivery_date,PO-1321,A - Value defects,Promised precedes order,2025-09-17,2024-12-01,Negative lead times
+DFT-027,Silver,Silver DQ gate,silver_purchase_order_lines,unit_price_usd,PO-1016,A - Value defects,Text in numeric,30.74,TBD,AVG price / spend fails or drops rows
+DFT-028,Silver,Silver DQ gate,silver_purchase_order_lines,unit_price_usd,PO-1080,A - Value defects,Text in numeric,42.07,TBD,AVG price / spend fails or drops rows
+DFT-029,Silver,Silver DQ gate,silver_purchase_order_lines,unit_price_usd,PO-1185,A - Value defects,Text in numeric,56.17,TBD,AVG price / spend fails or drops rows
+DFT-030,Silver,Silver DQ gate,silver_purchase_order_lines,unit_price_usd,PO-1327,A - Value defects,Text in numeric,21.84,TBD,AVG price / spend fails or drops rows
+DFT-031,Silver,Silver DQ gate,silver_purchase_order_lines,unit_price_usd,PO-1419,A - Value defects,Text in numeric,21.88,TBD,AVG price / spend fails or drops rows
+DFT-032,Silver,Silver referential integrity,silver_purchase_order_lines,supplier_id,PO-1461,B - Orphan keys,Orphan FK (supplier),SUP-013,SUP-777,Spend-by-supplier undercounts (join drops)
+DFT-033,Silver,Silver referential integrity,silver_purchase_order_lines,supplier_id,PO-1209,B - Orphan keys,Orphan FK (supplier),SUP-001,SUP-777,Spend-by-supplier undercounts (join drops)
+DFT-034,Silver,Silver referential integrity,silver_purchase_order_lines,supplier_id,PO-1396,B - Orphan keys,Orphan FK (supplier),SUP-005,SUP-777,Spend-by-supplier undercounts (join drops)
+DFT-035,Silver,Silver referential integrity,silver_purchase_order_lines,supplier_id,PO-1404,B - Orphan keys,Orphan FK (supplier),SUP-007,SUP-777,Spend-by-supplier undercounts (join drops)
+DFT-036,Silver,Silver referential integrity,silver_purchase_order_lines,supplier_id,PO-1298,B - Orphan keys,Orphan FK (supplier),SUP-003,SUP-777,Spend-by-supplier undercounts (join drops)
+DFT-037,Silver,Silver referential integrity,silver_purchase_order_lines,supplier_id,PO-1346,B - Orphan keys,Orphan FK (supplier),SUP-004,SUP-777,Spend-by-supplier undercounts (join drops)
+DFT-038,Silver,Silver referential integrity,silver_purchase_order_lines,material_id,PO-1507,B - Orphan keys,Orphan FK (material),MAT-104,MAT-999,Spend-by-commodity misses lines
+DFT-039,Silver,Silver referential integrity,silver_purchase_order_lines,material_id,PO-1320,B - Orphan keys,Orphan FK (material),MAT-103,MAT-999,Spend-by-commodity misses lines
+DFT-040,Silver,Silver referential integrity,silver_purchase_order_lines,material_id,PO-1474,B - Orphan keys,Orphan FK (material),MAT-104,MAT-999,Spend-by-commodity misses lines
+DFT-041,Silver,Silver referential integrity,silver_purchase_order_lines,material_id,PO-1372,B - Orphan keys,Orphan FK (material),MAT-109,MAT-999,Spend-by-commodity misses lines
+DFT-042,Silver,Silver referential integrity,silver_purchase_order_lines,material_id,PO-1328,B - Orphan keys,Orphan FK (material),MAT-109,MAT-999,Spend-by-commodity misses lines
+DFT-043,Silver,Silver DQ gate,silver_purchase_order_lines,plant_id,PO-1259,C - Missing data,Missing grouping key,PLT-02,<null>,Spend-by-plant omits POs
+DFT-044,Silver,Silver DQ gate,silver_purchase_order_lines,plant_id,PO-1349,C - Missing data,Missing grouping key,PLT-02,<null>,Spend-by-plant omits POs
+DFT-045,Silver,Silver DQ gate,silver_purchase_order_lines,plant_id,PO-1143,C - Missing data,Missing grouping key,PLT-04,<null>,Spend-by-plant omits POs
+DFT-046,Silver,Silver DQ gate,silver_purchase_order_lines,plant_id,PO-1109,C - Missing data,Missing grouping key,PLT-05,<null>,Spend-by-plant omits POs
+DFT-047,Silver,Silver DQ gate,silver_purchase_order_lines,plant_id,PO-1444,C - Missing data,Missing grouping key,PLT-03,<null>,Spend-by-plant omits POs
+DFT-048,Silver,Silver DQ gate,silver_purchase_order_lines,plant_id,PO-1013,C - Missing data,Missing grouping key,PLT-01,<null>,Spend-by-plant omits POs
+DFT-049,Silver,Silver DQ gate,silver_purchase_order_lines,plant_id,PO-1413,C - Missing data,Missing grouping key,PLT-05,<null>,Spend-by-plant omits POs
+DFT-050,Silver,Silver DQ gate,silver_purchase_order_lines,order_date,PO-1358,E - Inconsistent encoding,Mixed date format,2025-09-10,10-09-2025,Quarter/time filters misparse
+DFT-051,Silver,Silver DQ gate,silver_purchase_order_lines,order_date,PO-1338,E - Inconsistent encoding,Mixed date format,2025-09-06,06-09-2025,Quarter/time filters misparse
+DFT-052,Silver,Silver DQ gate,silver_purchase_order_lines,order_date,PO-1298,E - Inconsistent encoding,Mixed date format,2025-08-01,01-08-2025,Quarter/time filters misparse
+DFT-053,Silver,Silver DQ gate,silver_purchase_order_lines,order_date,PO-1013,E - Inconsistent encoding,Mixed date format,2025-01-12,12-01-2025,Quarter/time filters misparse
+DFT-054,Silver,Silver DQ gate,silver_purchase_order_lines,order_date,PO-1420,E - Inconsistent encoding,Mixed date format,2025-10-11,11-10-2025,Quarter/time filters misparse
+DFT-055,Silver,Silver DQ gate,silver_purchase_order_lines,order_date,PO-1404,E - Inconsistent encoding,Mixed date format,2025-10-09,09-10-2025,Quarter/time filters misparse
+DFT-056,Silver,Silver DQ gate,silver_purchase_order_lines,order_date,PO-1481,E - Inconsistent encoding,Mixed date format,2025-12-19,19-12-2025,Quarter/time filters misparse
+DFT-057,Silver,Silver DQ gate,silver_purchase_order_lines,order_date,PO-1173,E - Inconsistent encoding,Mixed date format,2025-05-19,19-05-2025,Quarter/time filters misparse
+DFT-058,Silver,Silver DQ gate,silver_purchase_order_lines,po_value_usd,PO-1426,E - Inconsistent encoding,Currency mixing (EUR in USD),12599.44,11591.48,EU supplier spend understated
+DFT-059,Silver,Silver DQ gate,silver_purchase_order_lines,po_value_usd,PO-1130,E - Inconsistent encoding,Currency mixing (EUR in USD),17922.48,16488.68,EU supplier spend understated
+DFT-060,Silver,Silver DQ gate,silver_purchase_order_lines,po_value_usd,PO-1041,E - Inconsistent encoding,Currency mixing (EUR in USD),11381.39,10470.88,EU supplier spend understated
+DFT-061,Silver,Silver DQ gate,silver_purchase_order_lines,po_value_usd,PO-1247,E - Inconsistent encoding,Currency mixing (EUR in USD),18133.24,16682.58,EU supplier spend understated
+DFT-062,Silver,Silver DQ gate,silver_purchase_order_lines,po_value_usd,PO-1427,E - Inconsistent encoding,Currency mixing (EUR in USD),20836.2,19169.3,EU supplier spend understated
+DFT-063,Silver,Silver DQ gate,silver_purchase_order_lines,po_value_usd,PO-1020,E - Inconsistent encoding,Currency mixing (EUR in USD),144971.28,133373.58,EU supplier spend understated
+DFT-064,Silver,Silver referential integrity,silver_goods_receipts,po_id,GRN-5479,B - Orphan keys,Orphan FK (receipt w/o PO),PO-1479,PO-000000,3-way match fails; OTIF denominator wrong
+DFT-065,Silver,Silver referential integrity,silver_goods_receipts,po_id,GRN-5453,B - Orphan keys,Orphan FK (receipt w/o PO),PO-1453,PO-000000,3-way match fails; OTIF denominator wrong
+DFT-066,Silver,Silver referential integrity,silver_goods_receipts,po_id,GRN-5029,B - Orphan keys,Orphan FK (receipt w/o PO),PO-1029,PO-000000,3-way match fails; OTIF denominator wrong
+DFT-067,Silver,Silver referential integrity,silver_goods_receipts,po_id,GRN-5000,B - Orphan keys,Orphan FK (receipt w/o PO),PO-1000,PO-000000,3-way match fails; OTIF denominator wrong
+DFT-068,Silver,Silver referential integrity,silver_goods_receipts,po_id,GRN-5312,B - Orphan keys,Orphan FK (receipt w/o PO),PO-1312,PO-000000,3-way match fails; OTIF denominator wrong
+DFT-069,Silver,Silver referential integrity,silver_goods_receipts,po_id,GRN-5333,B - Orphan keys,Orphan FK (receipt w/o PO),PO-1333,PO-000000,3-way match fails; OTIF denominator wrong
+DFT-070,Silver,Silver DQ gate,silver_goods_receipts,received_date,GRN-5355,C - Missing data,Missing delivery date,2025-10-07,<null>,OTD uncomputable; monthly trend has holes
+DFT-071,Silver,Silver DQ gate,silver_goods_receipts,received_date,GRN-5225,C - Missing data,Missing delivery date,2025-06-25,<null>,OTD uncomputable; monthly trend has holes
+DFT-072,Silver,Silver DQ gate,silver_goods_receipts,received_date,GRN-5150,C - Missing data,Missing delivery date,2025-05-03,<null>,OTD uncomputable; monthly trend has holes
+DFT-073,Silver,Silver DQ gate,silver_goods_receipts,received_date,GRN-5070,C - Missing data,Missing delivery date,2025-03-02,<null>,OTD uncomputable; monthly trend has holes
+DFT-074,Silver,Silver DQ gate,silver_goods_receipts,received_date,GRN-5433,C - Missing data,Missing delivery date,2025-11-30,<null>,OTD uncomputable; monthly trend has holes
+DFT-075,Silver,Silver DQ gate,silver_goods_receipts,received_date,GRN-5340,C - Missing data,Missing delivery date,2025-10-08,<null>,OTD uncomputable; monthly trend has holes
+DFT-076,Silver,Silver DQ gate,silver_goods_receipts,received_date,GRN-5020,C - Missing data,Missing delivery date,2025-01-21,<null>,OTD uncomputable; monthly trend has holes
+DFT-077,Silver,Silver DQ gate,silver_goods_receipts,received_date,GRN-5374,C - Missing data,Missing delivery date,2025-09-17,<null>,OTD uncomputable; monthly trend has holes
+DFT-078,Silver,Silver DQ gate,silver_goods_receipts,delivery_status,GRN-5058,C - Missing data,Missing status flag,On-Time,<null>,On-Time count undercounts
+DFT-079,Silver,Silver DQ gate,silver_goods_receipts,delivery_status,GRN-5301,C - Missing data,Missing status flag,On-Time,<null>,On-Time count undercounts
+DFT-080,Silver,Silver DQ gate,silver_goods_receipts,delivery_status,GRN-5120,C - Missing data,Missing status flag,On-Time,<null>,On-Time count undercounts
+DFT-081,Silver,Silver DQ gate,silver_goods_receipts,delivery_status,GRN-5272,C - Missing data,Missing status flag,On-Time,<null>,On-Time count undercounts
+DFT-082,Silver,Silver DQ gate,silver_goods_receipts,delivery_status,GRN-5254,C - Missing data,Missing status flag,On-Time,<null>,On-Time count undercounts
+DFT-083,Silver,Silver DQ gate,silver_goods_receipts,delivery_status,GRN-5124,C - Missing data,Missing status flag,On-Time,<null>,On-Time count undercounts
+DFT-084,Silver,Silver dedup,silver_goods_receipts,grn_id,GRN-5159,D - Duplicate/contradictory,"Duplicate GRN, contradictory qty",108,151,Received/accepted double-count; volume inflated
+DFT-085,Silver,Silver dedup,silver_goods_receipts,grn_id,GRN-5441,D - Duplicate/contradictory,"Duplicate GRN, contradictory qty",150,210,Received/accepted double-count; volume inflated
+DFT-086,Silver,Silver dedup,silver_goods_receipts,grn_id,GRN-5401,D - Duplicate/contradictory,"Duplicate GRN, contradictory qty",588,823,Received/accepted double-count; volume inflated
+DFT-087,Silver,Silver dedup,silver_goods_receipts,grn_id,GRN-5273,D - Duplicate/contradictory,"Duplicate GRN, contradictory qty",449,628,Received/accepted double-count; volume inflated
+DFT-088,Silver,Silver dedup,silver_goods_receipts,grn_id,GRN-5137,D - Duplicate/contradictory,"Duplicate GRN, contradictory qty",169,236,Received/accepted double-count; volume inflated
+DFT-089,Silver,Silver dedup,silver_goods_receipts,grn_id,GRN-5230,D - Duplicate/contradictory,"Duplicate GRN, contradictory qty",242,338,Received/accepted double-count; volume inflated
+DFT-090,Silver,Silver DQ gate,silver_goods_receipts,delivery_status,(6 rows),E - Inconsistent encoding,Inconsistent label ('ontime'),On-Time,ontime,On-Time counts split across spellings
+DFT-091,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90066,A - Value defects,Out-of-range PPM (>1e6/neg),401,5000000,Quality ranking crowns a fake best/worst supplier
+DFT-092,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90460,A - Value defects,Out-of-range PPM (>1e6/neg),473,-300,Quality ranking crowns a fake best/worst supplier
+DFT-093,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90111,A - Value defects,Out-of-range PPM (>1e6/neg),1374,5000000,Quality ranking crowns a fake best/worst supplier
+DFT-094,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90956,A - Value defects,Out-of-range PPM (>1e6/neg),4523,-300,Quality ranking crowns a fake best/worst supplier
+DFT-095,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90685,A - Value defects,Out-of-range PPM (>1e6/neg),507,5000000,Quality ranking crowns a fake best/worst supplier
+DFT-096,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90543,A - Value defects,Out-of-range PPM (>1e6/neg),510,-300,Quality ranking crowns a fake best/worst supplier
+DFT-097,Silver,Silver referential integrity,silver_quality_inspections,grn_id,INS-90294,B - Orphan keys,Orphan FK (inspection w/o receipt),GRN-5155,GRN-000000,Quality can't tie to delivery; PPM rollup skewed
+DFT-098,Silver,Silver referential integrity,silver_quality_inspections,grn_id,INS-90895,B - Orphan keys,Orphan FK (inspection w/o receipt),GRN-5459,GRN-000000,Quality can't tie to delivery; PPM rollup skewed
+DFT-099,Silver,Silver referential integrity,silver_quality_inspections,grn_id,INS-90118,B - Orphan keys,Orphan FK (inspection w/o receipt),GRN-5062,GRN-000000,Quality can't tie to delivery; PPM rollup skewed
+DFT-100,Silver,Silver referential integrity,silver_quality_inspections,grn_id,INS-90029,B - Orphan keys,Orphan FK (inspection w/o receipt),GRN-5016,GRN-000000,Quality can't tie to delivery; PPM rollup skewed
+DFT-101,Silver,Silver referential integrity,silver_quality_inspections,grn_id,INS-90716,B - Orphan keys,Orphan FK (inspection w/o receipt),GRN-5368,GRN-000000,Quality can't tie to delivery; PPM rollup skewed
+DFT-102,Silver,Silver referential integrity,silver_quality_inspections,grn_id,INS-90843,B - Orphan keys,Orphan FK (inspection w/o receipt),GRN-5433,GRN-000000,Quality can't tie to delivery; PPM rollup skewed
+DFT-103,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90980,C - Missing data,Missing PPM,2722,<null>,AVG(defect_ppm) biased; some months excluded
+DFT-104,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90167,C - Missing data,Missing PPM,334.0,<null>,AVG(defect_ppm) biased; some months excluded
+DFT-105,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90108,C - Missing data,Missing PPM,715.0,<null>,AVG(defect_ppm) biased; some months excluded
+DFT-106,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90779,C - Missing data,Missing PPM,1196.0,<null>,AVG(defect_ppm) biased; some months excluded
+DFT-107,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90844,C - Missing data,Missing PPM,497.0,<null>,AVG(defect_ppm) biased; some months excluded
+DFT-108,Silver,Silver DQ gate,silver_quality_inspections,defect_ppm,INS-90503,C - Missing data,Missing PPM,486.0,<null>,AVG(defect_ppm) biased; some months excluded
+DFT-109,Silver,Silver DQ gate,silver_quality_inspections,defect_category,(6 rows),E - Inconsistent encoding,Inconsistent label casing,Contamination,contamination,Pareto of defect types splits categories
+DFT-110,Silver,Silver referential integrity,silver_inventory_movements,material_id,MOV-701136,B - Orphan keys,Orphan FK (material),MAT-102,MAT-888,Inventory-by-commodity drops rows
+DFT-111,Silver,Silver referential integrity,silver_inventory_movements,material_id,MOV-701190,B - Orphan keys,Orphan FK (material),MAT-108,MAT-888,Inventory-by-commodity drops rows
+DFT-112,Silver,Silver referential integrity,silver_inventory_movements,material_id,MOV-701139,B - Orphan keys,Orphan FK (material),MAT-106,MAT-888,Inventory-by-commodity drops rows
+DFT-113,Silver,Silver referential integrity,silver_inventory_movements,material_id,MOV-701234,B - Orphan keys,Orphan FK (material),MAT-107,MAT-888,Inventory-by-commodity drops rows
+DFT-114,Silver,Silver referential integrity,silver_inventory_movements,material_id,MOV-700781,B - Orphan keys,Orphan FK (material),MAT-109,MAT-888,Inventory-by-commodity drops rows
+DFT-115,Silver,Silver referential integrity,silver_inventory_movements,material_id,MOV-700931,B - Orphan keys,Orphan FK (material),MAT-102,MAT-888,Inventory-by-commodity drops rows
+DFT-116,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-700940,C - Missing data,Missing movement qty,-166,<null>,Running balance corrupted -> wrong on-hand
+DFT-117,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-701205,C - Missing data,Missing movement qty,-452.0,<null>,Running balance corrupted -> wrong on-hand
+DFT-118,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-701000,C - Missing data,Missing movement qty,-114.0,<null>,Running balance corrupted -> wrong on-hand
+DFT-119,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-700259,C - Missing data,Missing movement qty,191.0,<null>,Running balance corrupted -> wrong on-hand
+DFT-120,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-701090,C - Missing data,Missing movement qty,-71.0,<null>,Running balance corrupted -> wrong on-hand
+DFT-121,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-701316,C - Missing data,Missing movement qty,-131.0,<null>,Running balance corrupted -> wrong on-hand
+DFT-122,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-700390,F - Functional/semantic,Unit magnitude mismatch (KG in MT),193.0,193000.0,Soda Ash on-hand wildly overstated
+DFT-123,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-700214,F - Functional/semantic,Unit magnitude mismatch (KG in MT),498.0,498000.0,Soda Ash on-hand wildly overstated
+DFT-124,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-700484,F - Functional/semantic,Unit magnitude mismatch (KG in MT),356.0,356000.0,Soda Ash on-hand wildly overstated
+DFT-125,Silver,Silver DQ gate,silver_inventory_movements,quantity,MOV-700888,F - Functional/semantic,Unit magnitude mismatch (KG in MT),-143.0,-143000.0,Soda Ash on-hand wildly overstated
+DFT-126,Silver,Silver dedup,silver_inventory_movements,movement_id,MOV-700219,D - Duplicate/contradictory,Duplicate receipt movement,218.0,218.0,Double-posted receipts inflate on-hand
+DFT-127,Silver,Silver dedup,silver_inventory_movements,movement_id,MOV-700372,D - Duplicate/contradictory,Duplicate receipt movement,512.0,512.0,Double-posted receipts inflate on-hand
+DFT-128,Silver,Silver dedup,silver_inventory_movements,movement_id,MOV-700387,D - Duplicate/contradictory,Duplicate receipt movement,506.0,506.0,Double-posted receipts inflate on-hand
+DFT-129,Silver,Silver dedup,silver_inventory_movements,movement_id,MOV-700231,D - Duplicate/contradictory,Duplicate receipt movement,242.0,242.0,Double-posted receipts inflate on-hand
+DFT-130,Silver,Silver dedup,silver_inventory_movements,movement_id,MOV-700166,D - Duplicate/contradictory,Duplicate receipt movement,493.0,493.0,Double-posted receipts inflate on-hand
+DFT-131,Gold,Gold model/grain test,gold_supplier_scorecard_monthly,date_key+supplier_id,202506/SUP-006,D - Duplicate/contradictory,"Duplicate scorecard row, contradictory score",95.8,100,AVG score & best-supplier inflated; month double-counted
+DFT-132,Gold,Gold model/grain test,gold_supplier_scorecard_monthly,date_key+supplier_id,202506/SUP-010,D - Duplicate/contradictory,"Duplicate scorecard row, contradictory score",86.0,100,AVG score & best-supplier inflated; month double-counted
+DFT-133,Gold,Gold model/grain test,gold_supplier_scorecard_monthly,date_key+supplier_id,202512/SUP-013,D - Duplicate/contradictory,"Duplicate scorecard row, contradictory score",67.5,79.9,AVG score & best-supplier inflated; month double-counted
+DFT-134,Gold,Gold model/grain test,gold_supplier_scorecard_monthly,date_key+supplier_id,202601/SUP-002,D - Duplicate/contradictory,"Duplicate scorecard row, contradictory score",88.6,100,AVG score & best-supplier inflated; month double-counted
+DFT-135,Gold,Gold model/grain test,gold_supplier_scorecard_monthly,date_key+supplier_id,202509/SUP-007,D - Duplicate/contradictory,"Duplicate scorecard row, contradictory score",77.9,95.7,AVG score & best-supplier inflated; month double-counted
+DFT-136,Gold,Gold model/grain test,gold_supplier_scorecard_monthly,date_key+supplier_id,202504/SUP-005,D - Duplicate/contradictory,"Duplicate scorecard row, contradictory score",76.4,89.8,AVG score & best-supplier inflated; month double-counted
+DFT-137,Gold,Gold model/grain test,gold_supplier_scorecard_monthly,date_key+supplier_id,202511/SUP-001,D - Duplicate/contradictory,"Duplicate scorecard row, contradictory score",100.5,100,AVG score & best-supplier inflated; month double-counted
+DFT-138,Gold,Gold model/grain test,gold_supplier_scorecard_monthly,date_key+supplier_id,202506/SUP-007,D - Duplicate/contradictory,"Duplicate scorecard row, contradictory score",86.8,95.5,AVG score & best-supplier inflated; month double-counted
+DFT-139,Gold,Gold referential integrity,gold_supplier_scorecard_monthly,supplier_id,202507,B - Orphan keys,Orphan FK (unknown supplier),SUP-004,SUP-555,Ranking omits real months
+DFT-140,Gold,Gold referential integrity,gold_supplier_scorecard_monthly,supplier_id,202502,B - Orphan keys,Orphan FK (unknown supplier),SUP-007,SUP-555,Ranking omits real months
+DFT-141,Gold,Gold referential integrity,gold_supplier_scorecard_monthly,supplier_id,202506,B - Orphan keys,Orphan FK (unknown supplier),SUP-003,SUP-555,Ranking omits real months
+DFT-142,Gold,Gold referential integrity,gold_supplier_scorecard_monthly,supplier_id,202509,B - Orphan keys,Orphan FK (unknown supplier),SUP-013,SUP-555,Ranking omits real months
+DFT-143,Gold,Gold referential integrity,gold_supplier_scorecard_monthly,supplier_id,202507,B - Orphan keys,Orphan FK (unknown supplier),SUP-002,SUP-555,Ranking omits real months
+DFT-144,Gold,Gold DQ gate,gold_supplier_scorecard_monthly,overall_score,202508/SUP-013,C - Missing data,Missing KPI value,56.3,<null>,AVG score biased; months excluded
+DFT-145,Gold,Gold DQ gate,gold_supplier_scorecard_monthly,overall_score,202601/SUP-014,C - Missing data,Missing KPI value,86.0,<null>,AVG score biased; months excluded
+DFT-146,Gold,Gold DQ gate,gold_supplier_scorecard_monthly,overall_score,202502/SUP-008,C - Missing data,Missing KPI value,86.9,<null>,AVG score biased; months excluded
+DFT-147,Gold,Gold DQ gate,gold_supplier_scorecard_monthly,overall_score,202502/SUP-001,C - Missing data,Missing KPI value,100.2,<null>,AVG score biased; months excluded
+DFT-148,Gold,Gold DQ gate,gold_supplier_scorecard_monthly,overall_score,202508/SUP-006,C - Missing data,Missing KPI value,95.2,<null>,AVG score biased; months excluded
+DFT-149,Gold,Gold DQ gate,gold_supplier_scorecard_monthly,overall_score,202507/SUP-005,C - Missing data,Missing KPI value,68.9,<null>,AVG score biased; months excluded
+DFT-150,Gold,Gold model test,gold_supplier_scorecard_monthly,rating_v2,(all rows),F - Functional/semantic,2nd rating column contradicts overall_score,supplier_rating,rating_v2 (inverted),Two ratings disagree -> Genie may pick wrong one
+DFT-151,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202501/SUP-004,F - Functional/semantic,Scale mismatch (fraction vs percent),100.0,1.0,AVG(otd_pct) collapses toward 0
+DFT-152,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202507/SUP-555,F - Functional/semantic,Scale mismatch (fraction vs percent),100.0,1.0,AVG(otd_pct) collapses toward 0
+DFT-153,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202504/SUP-013,F - Functional/semantic,Scale mismatch (fraction vs percent),100.0,1.0,AVG(otd_pct) collapses toward 0
+DFT-154,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202601/SUP-004,F - Functional/semantic,Scale mismatch (fraction vs percent),100.0,1.0,AVG(otd_pct) collapses toward 0
+DFT-155,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202508/SUP-007,F - Functional/semantic,Scale mismatch (fraction vs percent),100.0,1.0,AVG(otd_pct) collapses toward 0
+DFT-156,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202501/SUP-011,F - Functional/semantic,Scale mismatch (fraction vs percent),100.0,1.0,AVG(otd_pct) collapses toward 0
+DFT-157,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202512/SUP-006,F - Functional/semantic,Scale mismatch (fraction vs percent),100.0,1.0,AVG(otd_pct) collapses toward 0
+DFT-158,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202507/SUP-005,F - Functional/semantic,Scale mismatch (fraction vs percent),80.0,0.8,AVG(otd_pct) collapses toward 0
+DFT-159,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202504/SUP-001,F - Functional/semantic,Scale mismatch (fraction vs percent),100.0,1.0,AVG(otd_pct) collapses toward 0
+DFT-160,Gold,Gold model test,gold_supplier_scorecard_monthly,otd_pct,202506/SUP-555,F - Functional/semantic,Scale mismatch (fraction vs percent),50.0,0.5,AVG(otd_pct) collapses toward 0
+DFT-161,Gold,Gold DQ gate,gold_inventory_snapshot_monthly,on_hand_qty,PLT-02/MAT-103,C - Missing data,Missing stock level,1447.0,<null>,Total on-hand understated
+DFT-162,Gold,Gold DQ gate,gold_inventory_snapshot_monthly,on_hand_qty,PLT-05/MAT-101,C - Missing data,Missing stock level,2537.0,<null>,Total on-hand understated
+DFT-163,Gold,Gold DQ gate,gold_inventory_snapshot_monthly,on_hand_qty,PLT-02/MAT-104,C - Missing data,Missing stock level,866.0,<null>,Total on-hand understated
+DFT-164,Gold,Gold DQ gate,gold_inventory_snapshot_monthly,on_hand_qty,PLT-06/MAT-105,C - Missing data,Missing stock level,1170.0,<null>,Total on-hand understated
+DFT-165,Gold,Gold DQ gate,gold_inventory_snapshot_monthly,on_hand_qty,PLT-06/MAT-102,C - Missing data,Missing stock level,214.0,<null>,Total on-hand understated
+DFT-166,Gold,Gold DQ gate,gold_inventory_snapshot_monthly,on_hand_qty,PLT-02/MAT-105,C - Missing data,Missing stock level,-271.0,<null>,Total on-hand understated
+DFT-167,Gold,Gold DQ gate,gold_demand_supply_monthly,supply_fill_rate_pct,PLT-06/MAT-101,A - Value defects,Fill rate outside 0-100,99.8,145.0,Service-level KPI >100%/neg
+DFT-168,Gold,Gold DQ gate,gold_demand_supply_monthly,supply_fill_rate_pct,PLT-05/MAT-102,A - Value defects,Fill rate outside 0-100,100.0,-12.0,Service-level KPI >100%/neg
+DFT-169,Gold,Gold DQ gate,gold_demand_supply_monthly,supply_fill_rate_pct,PLT-06/MAT-111,A - Value defects,Fill rate outside 0-100,100.0,145.0,Service-level KPI >100%/neg
+DFT-170,Gold,Gold DQ gate,gold_demand_supply_monthly,supply_fill_rate_pct,PLT-06/MAT-112,A - Value defects,Fill rate outside 0-100,94.0,-12.0,Service-level KPI >100%/neg
+DFT-171,Gold,Gold DQ gate,gold_demand_supply_monthly,supply_fill_rate_pct,PLT-05/MAT-109,A - Value defects,Fill rate outside 0-100,98.4,145.0,Service-level KPI >100%/neg
+DFT-172,Gold,Gold cross-mart reconciliation,gold_supplier_summary,total_spend_usd,SUP-004,D - Duplicate/contradictory,Summary spend disagrees with spend mart,513341.89999999997,641677.0,Two gold marts give different spend for same supplier
+DFT-173,Gold,Gold cross-mart reconciliation,gold_supplier_summary,total_spend_usd,SUP-006,D - Duplicate/contradictory,Summary spend disagrees with spend mart,3657739.71,4572175.0,Two gold marts give different spend for same supplier
+DFT-174,Gold,Gold cross-mart reconciliation,gold_supplier_summary,total_spend_usd,SUP-007,D - Duplicate/contradictory,Summary spend disagrees with spend mart,706600.42,883251.0,Two gold marts give different spend for same supplier

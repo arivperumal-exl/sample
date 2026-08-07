@@ -1,0 +1,13 @@
+material_id,material_name,commodity,material_category,unit_of_measure,standard_price_usd
+MAT-101,Silica Sand (Grade A),Silica  Sand,Raw Batch,MT,55
+MAT-102,Soda Ash (Dense),soda ash,Raw Batch,MT,320
+MAT-103,Dolomite,Dolomite,Raw Batch,MT,48
+MAT-104,Limestone,Limestone,Raw Batch,MT,42
+MAT-105,Recycled Cullet,CULLET,Raw Batch,MT,30
+MAT-106,Salt Cake (Sodium Sulphate),Salt Cake,Raw Batch,MT,210
+MAT-107,Low-E Coating Target,Coatings,Coating,KG,-145
+MAT-108,Anti-Reflective Coating,Coatings,Coating,KG,160
+MAT-109,Wooden Shipping Crate,Packaging,Packaging,EA,22
+MAT-110,Interleaving Powder,Packaging,Packaging,,8
+MAT-111,Feldspar,Feldspar,Raw Batch,MT,75
+MAT-112,Alumina,Alumina,Raw Batch,MT,380

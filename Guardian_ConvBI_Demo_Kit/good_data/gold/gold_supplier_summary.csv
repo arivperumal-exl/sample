@@ -1,0 +1,15 @@
+supplier_id,supplier_name,supplier_tier,risk_rating,total_spend_usd,total_deliveries,avg_otd_pct,avg_otif_pct,avg_defect_ppm,avg_overall_score
+SUP-001,Silverline Sands Inc,Strategic,Low,630213.0,38,100.0,97.9,115,99.6
+SUP-002,Great Lakes Soda Ash Co,Strategic,Low,3792906.0,35,100.0,100.0,120,100.3
+SUP-003,Dolomite Direct LLC,Preferred,Low,608406.0,38,94.9,90.8,476,93.8
+SUP-004,Appalachian Limestone Corp,Preferred,Low,526396.0,38,94.9,94.9,425,94.0
+SUP-005,GreenCullet Recycling,Approved,Medium,443332.0,39,91.8,77.1,1550,79.9
+SUP-006,Rhine Minerals GmbH,Preferred,Low,3669337.0,36,100.0,98.1,504,94.8
+SUP-007,Iberian Silica SA,Approved,Medium,719305.0,39,84.6,66.7,1485,76.6
+SUP-008,Nordic SaltCake AB,Approved,Medium,2614093.0,35,95.5,82.4,1416,82.1
+SUP-009,Zhejiang Coatings Ltd,Approved,High,4696130.0,34,89.1,72.2,4827,62.7
+SUP-010,Bharat Minerals Pvt Ltd,Approved,Medium,623938.0,36,85.8,80.3,1522,80.9
+SUP-011,Volga Cullet Traders,Conditional,High,360835.0,34,77.1,61.1,5406,56.0
+SUP-012,PackRight Industrial,Approved,Low,289563.0,34,92.5,92.5,442,93.4
+SUP-013,Sahara Sand Trading FZE,Conditional,High,727218.0,36,82.4,65.7,4383,63.0
+SUP-014,Continental Limestone GmbH,Preferred,Low,503223.0,36,95.1,88.2,481,91.5
