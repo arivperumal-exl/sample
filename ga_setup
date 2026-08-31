@@ -1,0 +1,80 @@
+Here's the full setup walkthrough, based on the current Databricks docs (note: Databricks now calls these **Genie Agents**, the newer name for what were "Genie spaces" — same thing).
+
+## Step 1: Create the supervisor
+
+In your workspace: **Agents** → **Create Agent** → **Supervisor Agent**.
+
+## Step 2: Add your 5 Genie Agents as subagents
+
+In the **Tools and sub-agents** panel, add each of your 5 Genie Agents (you can mix in other tool types later — dashboards, UC functions, knowledge assistants, etc. — up to 50 total).
+
+**This is the part that actually determines routing quality:** for each Genie Agent, write a clear, specific **description**. The supervisor uses this text — not the agent's name — to decide who should answer a question. Bad descriptions cause bad routing.
+
+- Weak: *"Sales data"*
+- Better: *"Answers questions about sales pipeline, bookings, quota attainment, and win/loss by region and rep. Covers FY24–present. Does not cover marketing spend or finance/revenue-recognition data."*
+
+Explicitly stating what a space does **not** cover helps the supervisor avoid misrouting overlapping topics (e.g., "revenue" could plausibly live in Sales or Finance).
+
+## Step 3: Permissions (important — this trips people up)
+
+The supervisor enforces access control per subagent, not globally:
+
+- Each end user needs **explicit access to the underlying Genie Agent** (and its Unity Catalog tables) for the supervisor to be able to route to it. If a user has no access to any subagent, the supervisor ends the conversation; if they have partial access, it silently redirects away from the ones they can't see.
+- Separately, grant users **Can Query** on the supervisor agent itself (kebab menu → Manage permissions).
+
+So for your 5-LOB case: if HR shouldn't see Finance data, don't rely on the supervisor to hide it — make sure the underlying Finance Genie Agent's UC grants exclude that user. The supervisor respects that automatically.
+
+## Step 4: Instructions field
+
+Use the top-level **Instructions** field for cross-cutting behavior, e.g.:
+
+> "Always cite which LOB agent(s) a figure came from. If a question spans multiple LOBs, query all relevant agents and synthesize a single combined answer rather than listing separate answers. If a question is ambiguous about which LOB it refers to, ask a clarifying question instead of guessing."
+
+## Step 5: Test and tune (Agent Learning from Human Feedback)
+
+This is the differentiator vs. hand-rolling your own router:
+
+1. In the chat pane (or AI Playground), ask realistic cross-LOB questions.
+2. Where it misroutes or gives a poor answer, click **Add guidelines** and describe what should've happened.
+3. In the **Examples** tab, build a labeled set of representative questions and get subject-matter experts from each LOB to review/label them (grant them `Can Manage` and make sure they have access to the relevant subagents).
+4. The supervisor retrains/optimizes from this feedback — no code required.
+
+Iterate until routing and synthesis quality hold up, especially on the ambiguous "could be two LOBs" cases.
+
+## Step 6: Query the endpoint
+
+**Agents** page → your supervisor → **Endpoint**. From there, **Open in Playground → Get code** gives you working curl and Python examples against the deployed endpoint. That endpoint is what your web app calls for cross-LOB questions.
+
+## Managing it as code later
+
+Once it's stable, you can manage it via the Databricks SDK instead of the UI — useful for CI/CD:
+
+```python
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.supervisoragents import SupervisorAgent, Tool
+
+w = WorkspaceClient()
+
+supervisor = w.supervisor_agents.create_supervisor_agent(
+    supervisor_agent=SupervisorAgent(
+        display_name="LOB Insights Supervisor",
+        description="Routes questions to the right line-of-business Genie agent, or combines several for cross-LOB questions.",
+        instructions="Always cite the source LOB agent for each fact. For multi-LOB questions, synthesize one answer rather than listing separate answers.",
+    )
+)
+
+# repeat once per LOB Genie Agent
+w.supervisor_agents.create_tool(
+    parent=f"supervisor-agents/{supervisor.id}",
+    tool=Tool(
+        tool_type="genie_agent",
+        description="Answers questions about sales pipeline, bookings, and quota attainment by region and rep.",
+        genie_agent={"genie_space_id": "<sales-genie-space-id>"},
+    ),
+    tool_id="sales-lob",
+)
+```
+
+One limitation worth knowing: there's no "select all current and future Genie Agents" wildcard — each one is added individually, so if you add a 6th LOB later you'll need to register it explicitly (or automate that via the SDK against a system table of your Genie Agents).
+
+Want the Databricks Apps side next — the actual frontend code with the LOB dropdown that calls this supervisor endpoint for cross-LOB questions and the Genie Conversation API directly for single-LOB ones?
