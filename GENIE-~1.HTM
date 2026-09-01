@@ -1,0 +1,460 @@
+<title>Genie to Streamlit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --bg: #EDF1F3;
+    --surface: #FFFFFF;
+    --surface-2: #F4F8F9;
+    --ink: #14212A;
+    --ink-2: #4C6272;
+    --line: #C4D2D9;
+    --line-soft: #DDE6EA;
+    --accent: #0B7C8C;
+    --accent-soft: #DDEFF2;
+    --warn: #A8541B;
+    --warn-soft: #F6E9DE;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1418;
+      --surface: #161F25;
+      --surface-2: #1A252C;
+      --ink: #E4EDF1;
+      --ink-2: #93A9B5;
+      --line: #2C3B45;
+      --line-soft: #22303A;
+      --accent: #3FB9CB;
+      --accent-soft: #10333A;
+      --warn: #DE9257;
+      --warn-soft: #33241A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1418;
+    --surface: #161F25;
+    --surface-2: #1A252C;
+    --ink: #E4EDF1;
+    --ink-2: #93A9B5;
+    --line: #2C3B45;
+    --line-soft: #22303A;
+    --accent: #3FB9CB;
+    --accent-soft: #10333A;
+    --warn: #DE9257;
+    --warn-soft: #33241A;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 24px 96px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header.masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 64px 0 44px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+  h1 {
+    font-family: Chivo, "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    font-size: clamp(34px, 5.5vw, 54px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .standfirst {
+    font-size: 18px;
+    color: var(--ink-2);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  section { padding-top: 52px; }
+  h2 {
+    font-family: Chivo, sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .lede { color: var(--ink-2); max-width: 66ch; margin: 0 0 26px; }
+  p { max-width: 66ch; }
+
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px 22px 16px;
+    overflow-x: auto;
+  }
+  figure svg { display: block; width: 100%; min-width: 720px; height: auto; }
+  figcaption {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line-soft);
+    max-width: 78ch;
+  }
+
+  /* SVG theming */
+  .n-box { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.25; }
+  .n-seam { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.75; }
+  .n-title { fill: var(--ink); font-family: Chivo, sans-serif; font-weight: 600; }
+  .n-sub { fill: var(--ink-2); font-family: "IBM Plex Sans", sans-serif; }
+  .n-mono { fill: var(--ink); font-family: "IBM Plex Mono", monospace; }
+  .n-lab { fill: var(--ink-2); font-family: "IBM Plex Sans", sans-serif; font-size: 10.5px; }
+  .n-eyebrow { fill: var(--ink-2); font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.13em; }
+  .n-acc { fill: var(--accent); }
+  .n-warn { fill: var(--warn); }
+  .e-build { stroke: var(--ink-2); stroke-width: 1.4; fill: none; }
+  .e-run { stroke: var(--accent); stroke-width: 1.9; fill: none; }
+  .e-warn { stroke: var(--warn); stroke-width: 1.9; fill: none; }
+  .e-gate { stroke: var(--ink-2); stroke-width: 1.25; stroke-dasharray: 6 5; fill: none; opacity: 0.6; }
+  .div { stroke: var(--line); stroke-width: 1; }
+
+  ol.flow {
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 2px;
+  }
+  ol.flow li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 46px 1fr;
+    gap: 18px;
+    padding: 18px 0;
+    border-top: 1px solid var(--line-soft);
+    align-items: start;
+  }
+  ol.flow li::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--accent);
+    padding-top: 3px;
+  }
+  ol.flow strong {
+    display: block;
+    font-weight: 600;
+    font-size: 16.5px;
+    margin-bottom: 3px;
+  }
+  ol.flow span { color: var(--ink-2); display: block; max-width: 70ch; }
+  ol.flow code { font-size: 13px; }
+
+  code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13.5px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13.5px;
+    line-height: 1.65;
+    margin: 0;
+  }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 560px; }
+  th, td { text-align: left; padding: 13px 18px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    font-weight: 500;
+    background: var(--surface-2);
+  }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; white-space: nowrap; }
+
+  .sources { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-2); }
+  .sources ul { padding-left: 18px; margin: 8px 0 0; }
+  .sources a { color: var(--accent); }
+  a:focus-visible, li:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Databricks · Agent Bricks · Streamlit</p>
+    <h1>Genie to Streamlit</h1>
+    <p class="standfirst">One serving endpoint sits between the agents you configure and the chat UI your users see. Everything below hangs off that seam.</p>
+  </header>
+
+  <section>
+    <h2>The whole path</h2>
+    <p class="lede">Two things happen at different times and people conflate them. Configuring Genie and the supervisor is build time, done once in the UI. Answering a question is run time, and it travels a different route through the same objects.</p>
+
+    <figure>
+      <svg viewBox="0 0 1120 720" role="img" aria-label="Architecture diagram. Build time: Unity Catalog tables and SQL warehouse ground a Genie Agent, which along with other subagents is registered on a Supervisor Agent in Agent Bricks, which deploys to a Model Serving endpoint with task type Agent Responses. Run time: an end user asks a question in a Streamlit app, which calls responses.create on that endpoint with the user's token; the endpoint delegates to the Genie Agent, which runs generated SQL on a SQL warehouse against Unity Catalog tables; text, SQL and rows return to the endpoint and stream back to Streamlit as SSE deltas and tool-call items. Every hop inside the subagent boundary re-checks the calling user's grants.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ink-2)"></path>
+          </marker>
+          <marker id="ar-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"></path>
+          </marker>
+        </defs>
+
+        <!-- ZONE 1: BUILD -->
+        <text class="n-eyebrow" x="60" y="34">BUILD TIME · ONCE, IN THE UI</text>
+
+        <rect class="n-box" x="60" y="52" width="230" height="76" rx="8"></rect>
+        <text class="n-title" x="175" y="84" font-size="14.5" text-anchor="middle">Unity Catalog</text>
+        <text class="n-sub" x="175" y="104" font-size="11.5" text-anchor="middle">tables · SQL warehouse</text>
+
+        <rect class="n-box" x="350" y="52" width="230" height="76" rx="8"></rect>
+        <text class="n-title" x="465" y="84" font-size="14.5" text-anchor="middle">Genie Agent</text>
+        <text class="n-sub" x="465" y="104" font-size="11.5" text-anchor="middle">instructions · sample SQL</text>
+
+        <rect class="n-box" x="350" y="158" width="230" height="58" rx="8"></rect>
+        <text class="n-title" x="465" y="182" font-size="13" text-anchor="middle">Other subagents</text>
+        <text class="n-sub" x="465" y="200" font-size="11" text-anchor="middle">KA · UC function · MCP</text>
+
+        <rect class="n-box" x="660" y="76" width="250" height="112" rx="8"></rect>
+        <text class="n-title" x="785" y="112" font-size="15.5" text-anchor="middle">Supervisor Agent</text>
+        <text class="n-sub" x="785" y="132" font-size="11.5" text-anchor="middle">Agent Bricks</text>
+        <text class="n-sub" x="785" y="156" font-size="11" text-anchor="middle">instructions + tool descriptions</text>
+
+        <line class="e-build" x1="292" y1="90" x2="342" y2="90" marker-end="url(#ar)"></line>
+        <text class="n-lab" x="317" y="80" text-anchor="middle">grounds</text>
+
+        <polyline class="e-build" points="580,90 620,90 620,110 652,110" marker-end="url(#ar)"></polyline>
+        <text class="n-lab" x="600" y="80" text-anchor="middle">subagent</text>
+
+        <polyline class="e-build" points="580,187 620,187 620,158 652,158" marker-end="url(#ar)"></polyline>
+        <text class="n-lab" x="600" y="206" text-anchor="middle">tools</text>
+
+        <line class="e-build" x1="785" y1="190" x2="785" y2="250" marker-end="url(#ar)"></line>
+        <text class="n-lab" x="796" y="226">deploy</text>
+
+        <!-- SEAM -->
+        <rect class="n-seam" x="60" y="256" width="1000" height="58" rx="9"></rect>
+        <text class="n-mono" x="84" y="283" font-size="13" font-weight="500">your-supervisor-endpoint</text>
+        <text class="n-sub" x="84" y="302" font-size="11">Model Serving · task type: Agent (Responses)</text>
+        <text class="n-acc" x="1036" y="291" font-size="11.5" text-anchor="end" font-family="IBM Plex Mono, monospace">CAN QUERY required</text>
+
+        <!-- ZONE 2: RUNTIME -->
+        <text class="n-eyebrow" x="60" y="350">RUN TIME · EVERY QUESTION</text>
+
+        <rect class="n-box" x="60" y="368" width="230" height="52" rx="8"></rect>
+        <text class="n-title" x="175" y="399" font-size="13.5" text-anchor="middle">End user (browser)</text>
+
+        <line class="e-build" x1="175" y1="422" x2="175" y2="446" marker-end="url(#ar)"></line>
+        <text class="n-lab" x="186" y="440">question</text>
+
+        <rect class="n-box" x="60" y="452" width="230" height="176" rx="8"></rect>
+        <text class="n-title" x="175" y="481" font-size="15.5" text-anchor="middle">Streamlit app</text>
+        <line class="div" x1="80" y1="496" x2="270" y2="496"></line>
+        <text class="n-mono" x="80" y="518" font-size="10">st.chat_input()</text>
+        <text class="n-mono" x="80" y="540" font-size="10">responses.create(...)</text>
+        <text class="n-mono" x="80" y="562" font-size="10">st.markdown(text)</text>
+        <text class="n-mono" x="80" y="584" font-size="10">st.code(sql, "sql")</text>
+        <text class="n-mono" x="80" y="606" font-size="10">st.dataframe(rows)</text>
+
+        <polyline class="e-run" points="290,478 330,478 330,320" marker-end="url(#ar-a)"></polyline>
+        <text class="n-mono n-acc" x="344" y="381" font-size="10">responses.create()</text>
+        <text class="n-lab" x="344" y="398">input = history</text>
+        <text class="n-lab" x="344" y="414">+ caller's token</text>
+
+        <polyline class="e-run" points="470,320 470,600 298,600" marker-end="url(#ar-a)"></polyline>
+        <text class="n-lab" x="482" y="558">SSE text deltas</text>
+        <text class="n-lab" x="482" y="574">+ tool-call items</text>
+
+        <!-- identity boundary -->
+        <rect class="e-gate" x="684" y="348" width="282" height="308" rx="10"></rect>
+
+        <line class="e-run" x1="825" y1="318" x2="825" y2="360" marker-end="url(#ar-a)"></line>
+        <text class="n-lab" x="836" y="344">delegates</text>
+
+        <rect class="n-box" x="700" y="364" width="250" height="68" rx="8"></rect>
+        <text class="n-title" x="825" y="394" font-size="15" text-anchor="middle">Genie Agent</text>
+        <text class="n-sub" x="825" y="414" font-size="11" text-anchor="middle">natural language → SQL</text>
+
+        <line class="e-run" x1="825" y1="432" x2="825" y2="478" marker-start="url(#ar-a)" marker-end="url(#ar-a)"></line>
+        <text class="n-lab" x="838" y="460">runs SQL / rows</text>
+
+        <rect class="n-box" x="700" y="482" width="250" height="54" rx="8"></rect>
+        <text class="n-title" x="825" y="514" font-size="13.5" text-anchor="middle">SQL warehouse</text>
+
+        <line class="e-run" x1="825" y1="536" x2="825" y2="582" marker-start="url(#ar-a)" marker-end="url(#ar-a)"></line>
+        <text class="n-lab" x="838" y="564">SELECT / rows</text>
+
+        <rect class="n-box" x="700" y="586" width="250" height="54" rx="8"></rect>
+        <text class="n-title" x="825" y="618" font-size="13.5" text-anchor="middle">Unity Catalog tables</text>
+
+        <polyline class="e-run" points="950,392 1000,392 1000,322" marker-end="url(#ar-a)"></polyline>
+        <text class="n-lab" x="1010" y="358">text · SQL · rows</text>
+
+        <text class="n-lab" x="825" y="676" text-anchor="middle">every hop re-checks the caller's grants, not the app's</text>
+
+        <!-- legend -->
+        <line class="e-build" x1="60" y1="700" x2="96" y2="700"></line>
+        <text class="n-lab" x="104" y="704">build time</text>
+        <line class="e-run" x1="210" y1="700" x2="246" y2="700"></line>
+        <text class="n-lab" x="254" y="704">runtime request path</text>
+        <line class="e-gate" x1="420" y1="700" x2="456" y2="700"></line>
+        <text class="n-lab" x="464" y="704">identity / permission boundary</text>
+      </svg>
+      <figcaption>The supervisor endpoint is the only thing Streamlit talks to. Genie is never called directly from the app — it is reached as a subagent, which is why the caller's Unity Catalog grants, not the app's, decide what comes back.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>One question, end to end</h2>
+    <p class="lede">What the accent path in the diagram actually executes.</p>
+
+    <ol class="flow">
+      <li><strong>User types into <code>st.chat_input()</code></strong><span>Streamlit appends the turn to <code>st.session_state.messages</code> and reruns the script.</span></li>
+      <li><strong>The app builds a fresh client</strong><span>In Databricks Apps, from <code>st.context.headers["X-Forwarded-Access-Token"]</code>. Rebuilt every turn — that token expires and goes stale across WebSocket reconnects.</span></li>
+      <li><strong>It calls the Responses API</strong><span><code>client.responses.create(model=ENDPOINT, input=history, stream=True)</code>. Not chat completions: the endpoint's task type is Agent (Responses).</span></li>
+      <li><strong>The supervisor picks a subagent</strong><span>Routing is driven by the tool descriptions you wrote at build time, filtered by what the caller can access. No access to any subagent ends the conversation; partial access silently reroutes.</span></li>
+      <li><strong>Genie turns the question into SQL</strong><span>It runs against the SQL warehouse, reading the Unity Catalog tables the caller has <code>SELECT</code> on.</span></li>
+      <li><strong>Results stream back as events</strong><span><code>response.output_text.delta</code> carries prose; <code>response.output_item.done</code> carries the tool call and its output — the generated SQL and the result rows.</span></li>
+      <li><strong>Streamlit renders the three shapes</strong><span>Prose to <code>st.markdown</code>, SQL to <code>st.code</code>, rows to <code>st.dataframe</code>. Genie does not return charts over the API, so plot them yourself.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Which identity reaches the endpoint</h2>
+    <p class="lede">The hosting choice is really an auth choice, and it changes the answers users get.</p>
+
+    <figure>
+      <svg viewBox="0 0 1080 262" role="img" aria-label="Comparison of two hosting options. In Databricks Apps, the user's own forwarded access token reaches the endpoint, so the supervisor sees only that user's subagents. On a cluster driver proxy, a single personal access token reaches the endpoint, so every viewer runs as its owner and per-user access controls do not apply.">
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ink-2)"></path>
+          </marker>
+          <marker id="ar2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"></path>
+          </marker>
+          <marker id="ar2-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--warn)"></path>
+          </marker>
+        </defs>
+
+        <rect x="16" y="16" width="512" height="230" rx="12" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1"></rect>
+        <text class="n-title" x="44" y="52" font-size="14.5">Databricks Apps</text>
+
+        <rect class="n-box" x="44" y="96" width="124" height="56" rx="7"></rect>
+        <text class="n-title" x="106" y="129" font-size="12.5" text-anchor="middle">User</text>
+        <rect class="n-box" x="212" y="96" width="124" height="56" rx="7"></rect>
+        <text class="n-title" x="274" y="129" font-size="12.5" text-anchor="middle">Streamlit app</text>
+        <rect class="n-box" x="380" y="96" width="124" height="56" rx="7"></rect>
+        <text class="n-title" x="442" y="129" font-size="12.5" text-anchor="middle">Endpoint</text>
+
+        <line class="e-build" x1="172" y1="124" x2="206" y2="124" marker-end="url(#ar2)"></line>
+        <text class="n-lab" x="189" y="88" text-anchor="middle">OAuth</text>
+        <line class="e-run" x1="340" y1="124" x2="374" y2="124" marker-end="url(#ar2-a)"></line>
+        <text class="n-lab n-acc" x="357" y="88" text-anchor="middle">user token</text>
+
+        <text class="n-acc" x="44" y="192" font-size="12" font-family="IBM Plex Mono, monospace">X-Forwarded-Access-Token</text>
+        <text class="n-lab" x="44" y="214">The supervisor sees only the subagents and tables</text>
+        <text class="n-lab" x="44" y="230">that this particular person is granted.</text>
+
+        <rect x="552" y="16" width="512" height="230" rx="12" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1"></rect>
+        <text class="n-title" x="580" y="52" font-size="14.5">Cluster driver proxy</text>
+
+        <rect class="n-box" x="580" y="96" width="124" height="56" rx="7"></rect>
+        <text class="n-title" x="642" y="129" font-size="12.5" text-anchor="middle">User</text>
+        <rect class="n-box" x="748" y="96" width="124" height="56" rx="7"></rect>
+        <text class="n-title" x="810" y="122" font-size="12.5" text-anchor="middle">Streamlit on</text>
+        <text class="n-title" x="810" y="138" font-size="12.5" text-anchor="middle">the driver</text>
+        <rect class="n-box" x="916" y="96" width="124" height="56" rx="7"></rect>
+        <text class="n-title" x="978" y="129" font-size="12.5" text-anchor="middle">Endpoint</text>
+
+        <line class="e-build" x1="708" y1="124" x2="742" y2="124" marker-end="url(#ar2)"></line>
+        <text class="n-lab" x="725" y="88" text-anchor="middle">proxy URL</text>
+        <line class="e-warn" x1="876" y1="124" x2="910" y2="124" marker-end="url(#ar2-w)"></line>
+        <text class="n-lab n-warn" x="893" y="88" text-anchor="middle">one PAT</text>
+
+        <text class="n-warn" x="580" y="192" font-size="12" font-family="IBM Plex Mono, monospace">DATABRICKS_TOKEN</text>
+        <text class="n-lab" x="580" y="214">Everyone runs as the token's owner. Per-user</text>
+        <text class="n-lab" x="580" y="230">access controls do not apply. Demos only.</text>
+      </svg>
+      <figcaption>Structurally identical — one arrow differs. That arrow decides whether the supervisor's built-in access controls do anything at all.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Grants the caller needs</h2>
+    <p class="lede">Applied to the end user under on-behalf-of auth, or to the app's service principal otherwise.</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Object</th><th>Grant</th><th>Missing it looks like</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Supervisor endpoint</td><td><code>CAN QUERY</code></td><td>403 on the first call</td></tr>
+          <tr><td>Genie Agent</td><td>Access / <code>CAN RUN</code></td><td>Supervisor answers without touching data</td></tr>
+          <tr><td>Unity Catalog tables</td><td><code>SELECT</code> + <code>USE CATALOG</code> / <code>USE SCHEMA</code></td><td>Genie returns an empty or refused result</td></tr>
+          <tr><td>SQL warehouse</td><td><code>CAN USE</code></td><td>Query never executes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Where it breaks</h2>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Symptom</th><th>Cause</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>404 / unsupported task type</td><td>Calling chat completions against an Agent (Responses) endpoint</td></tr>
+          <tr><td>Works, then 401s</td><td>The OBO client was cached; rebuild it on every turn</td></tr>
+          <tr><td>Answers ignore Genie entirely</td><td>Thin tool description, or the caller lacks Genie access — it reroutes silently rather than erroring</td></tr>
+          <tr><td>Prose arrives, tables don't</td><td>Only handling <code>output_text.delta</code>; the rows are in <code>output_item.done</code></td></tr>
+          <tr><td>No charts</td><td>Expected — the API returns text, SQL and rows, never Genie's visualizations</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="sources">
+    Sources
+    <ul>
+      <li><a href="https://docs.databricks.com/aws/en/agents/agent-bricks/multi-agent-supervisor">Use Supervisor Agent to create a coordinated multi-agent system</a></li>
+      <li><a href="https://docs.databricks.com/aws/en/agents/custom-agents/multi-agent-apps">Build a multi-agent system on Databricks Apps</a></li>
+      <li><a href="https://apps-cookbook.dev/docs/streamlit/bi/genie_api/">Chat with a Genie Space — Databricks Apps Cookbook</a></li>
+      <li><a href="https://docs.databricks.com/aws/en/genie/conversation-api">Use the Genie Agents API</a></li>
+    </ul>
+  </div>
+
+</div>
