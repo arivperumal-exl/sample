@@ -1,222 +1,186 @@
-"""
-Genie Agent Search App - Dummy/Demo Version
-=============================================
-Streamlit demo showing:
-  - A central search box for asking questions
-  - Left-sidebar filters: Unique ID, Line of Business (LOB) -- multi-select
-  - Each LOB maps to its own "Genie" agent
-  - A question can be routed to ONE agent or FANNED OUT to MULTIPLE agents
-    at once (when the user selects more than one LOB, or asks a
-    cross-LOB question), with the individual answers merged into one view.
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Query an Agent Bricks Supervisor Agent
+# MAGIC
+# MAGIC Calls a deployed Supervisor Agent endpoint from Python and displays the answer.
+# MAGIC
+# MAGIC Auth is automatic inside a Databricks notebook -- the notebook runs as you, so no
+# MAGIC host URL or token is needed.
+# MAGIC
+# MAGIC **Before you run:** you (or whoever runs this) need `CAN QUERY` on the supervisor
+# MAGIC *and* access to every subagent it coordinates. See the troubleshooting cell at the bottom.
 
-Run with:
-    pip install streamlit
-    streamlit run genie_search_app.py
+# COMMAND ----------
 
-Replace the dummy agent functions / DUMMY_DATA with real Genie API calls
-(e.g. Databricks Genie API) once ready.
-"""
+# MAGIC %pip install -U databricks-openai databricks-sdk
 
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+# COMMAND ----------
 
-import streamlit as st
+dbutils.library.restartPython()
 
-# ---------------------------------------------------------------------------
-# 1. CONFIG / DUMMY DATA
-# ---------------------------------------------------------------------------
+# COMMAND ----------
 
-# Dummy Unique IDs (e.g. customer/policy/account IDs) shown in the filter.
-DUMMY_UNIQUE_IDS = ["ALL", "UID-1001", "UID-1002", "UID-1003", "UID-1004"]
+# MAGIC %md
+# MAGIC ## Step 1: Find your endpoint name
+# MAGIC
+# MAGIC Also visible on the **Agents** page -> your agent -> **Endpoint**.
 
-# Each Line of Business (LOB) is served by its own Genie agent.
-# Map LOB -> Genie space/agent id (dummy values, swap with real ones).
-LOB_AGENT_MAP = {
-    "Auto Insurance": "genie_space_auto_001",
-    "Home Insurance": "genie_space_home_002",
-    "Life Insurance": "genie_space_life_003",
-    "Health Insurance": "genie_space_health_004",
-}
+# COMMAND ----------
 
-LOB_OPTIONS = list(LOB_AGENT_MAP.keys())
+from databricks.sdk import WorkspaceClient
 
+w = WorkspaceClient()
+for e in w.serving_endpoints.list():
+    print(e.name)
 
-# ---------------------------------------------------------------------------
-# 2. GENIE AGENT CALL (DUMMY IMPLEMENTATION)
-# ---------------------------------------------------------------------------
-def call_genie_agent(agent_id: str, question: str, unique_id: str) -> dict:
-    """
-    Dummy stand-in for a real Genie agent call.
+# COMMAND ----------
 
-    In production, replace this with something like the Databricks Genie API:
+# MAGIC %md
+# MAGIC ## Step 2: Configure the client
 
-        from databricks.sdk import WorkspaceClient
-        w = WorkspaceClient()
-        conversation = w.genie.start_conversation(space_id=agent_id, content=question)
-        message = w.genie.wait_for_final_message(...)
-        return message
+# COMMAND ----------
 
-    Here we just fake a short delay and return a canned response so the UI
-    flow can be demoed end-to-end.
-    """
-    time.sleep(0.6)  # simulate network/agent latency
+from databricks_openai import DatabricksOpenAI
 
-    return {
-        "agent_id": agent_id,
-        "answer": (
-            f"[DUMMY RESPONSE from `{agent_id}`]\n\n"
-            f"You asked: \"{question}\"\n"
-            f"Filtered by Unique ID: {unique_id}\n\n"
-            f"(This is placeholder text. Wire this function to the real "
-            f"Genie agent API to get live answers.)"
-        ),
-        "sql": "SELECT * FROM dummy_table WHERE id = '{}' LIMIT 10;".format(unique_id),
-    }
+ENDPOINT = "<paste-your-endpoint-name-here>"
 
+# Supervisors fan out to subagents and may run sandboxed code, so responses are slow.
+client = DatabricksOpenAI(timeout=600)
 
-def route_question_to_agent(lob: str, question: str, unique_id: str) -> dict:
-    """Pick the correct Genie agent for a single Line of Business and call it."""
-    agent_id = LOB_AGENT_MAP[lob]
-    result = call_genie_agent(agent_id=agent_id, question=question, unique_id=unique_id)
-    result["lob"] = lob
-    return result
+# COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Step 3: Helper to extract the answer text
+# MAGIC
+# MAGIC Supervisor replies contain reasoning and tool-call items alongside the final message,
+# MAGIC so don't index blindly into `resp.output[0]`.
 
-def ask_multiple_genies(lobs: list, question: str, unique_id: str) -> list:
-    """
-    Fan the same question out to MULTIPLE Genie agents at once (one per
-    selected LOB) and gather all responses. Each agent only knows about its
-    own LOB's data, so this is how a cross-LOB question (e.g. "compare auto
-    and home claims for this customer") gets answered: ask each relevant
-    agent independently, then merge the answers in the UI.
+# COMMAND ----------
 
-    Uses a thread pool so the (network-bound) agent calls run concurrently
-    instead of one after another.
-    """
-    results = []
-    with ThreadPoolExecutor(max_workers=max(len(lobs), 1)) as pool:
-        futures = {
-            pool.submit(route_question_to_agent, lob, question, unique_id): lob
-            for lob in lobs
-        }
-        for future in as_completed(futures):
-            results.append(future.result())
+def extract_text(resp):
+    """Pull the assistant's text out of a Responses-API reply."""
+    txt = getattr(resp, "output_text", None)
+    if txt:
+        return txt
+    parts = []
+    for item in (resp.output or []):
+        for c in (getattr(item, "content", None) or []):
+            if getattr(c, "type", None) in ("output_text", "text"):
+                parts.append(c.text)
+    return "\n".join(parts)
 
-    # keep results in the same order the user selected the LOBs
-    order = {lob: i for i, lob in enumerate(lobs)}
-    results.sort(key=lambda r: order[r["lob"]])
-    return results
+# COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Step 4: Ask a single question
 
-def synthesize_combined_answer(question: str, per_agent_results: list) -> str:
-    """
-    Dummy stand-in for a final "combine" step. In production you could send
-    all the individual agent answers to an LLM to synthesize one cohesive
-    answer to the original cross-LOB question. Here we just concatenate them.
-    """
-    if len(per_agent_results) <= 1:
-        return ""
+# COMMAND ----------
 
-    lines = [f"**Combined summary across {len(per_agent_results)} lines of business:**", ""]
-    for r in per_agent_results:
-        lines.append(f"- **{r['lob']}**: {r['answer'].splitlines()[-1]}")
-    return "\n".join(lines)
+question = "What were the top three drivers of usage growth last quarter?"
 
-
-# ---------------------------------------------------------------------------
-# 3. STREAMLIT PAGE LAYOUT
-# ---------------------------------------------------------------------------
-st.set_page_config(page_title="Genie Search Demo", layout="wide")
-
-# ---- Sidebar: Filters -------------------------------------------------
-with st.sidebar:
-    st.header("Filters")
-
-    selected_unique_id = st.selectbox(
-        "Unique ID",
-        options=DUMMY_UNIQUE_IDS,
-        index=0,
-        help="Filter results to a specific record.",
-    )
-
-    selected_lobs = st.multiselect(
-        "Line of Business",
-        options=LOB_OPTIONS,
-        default=[],
-        help=(
-            "Determines which Genie agent(s) handle your question. "
-            "Select more than one to ask a question across multiple "
-            "lines of business at once."
-        ),
-    )
-
-    st.markdown("---")
-    if selected_lobs:
-        st.caption("Active agent(s):")
-        for lob in selected_lobs:
-            st.caption(f"- {lob} → `{LOB_AGENT_MAP[lob]}`")
-    else:
-        st.caption("No agent selected yet.")
-
-# ---- Main area: Centered search box -----------------------------------
-st.title("Ask Genie")
-
-# Center the search box using columns
-left_pad, center, right_pad = st.columns([1, 2, 1])
-
-with center:
-    question = st.text_input(
-        label="",
-        placeholder="Ask a question about your data...",
-        label_visibility="collapsed",
-    )
-    ask_clicked = st.button("Search", use_container_width=True)
-
-# ---- Handle search --------------------------------------------------
-if ask_clicked:
-    if not selected_lobs:
-        st.warning("Please choose at least one Line of Business from the left filter.")
-    elif not question.strip():
-        st.warning("Please enter a question.")
-    else:
-        spinner_msg = (
-            f"Asking the {selected_lobs[0]} Genie agent..."
-            if len(selected_lobs) == 1
-            else f"Asking {len(selected_lobs)} Genie agents in parallel..."
-        )
-        with st.spinner(spinner_msg):
-            results = ask_multiple_genies(
-                lobs=selected_lobs,
-                question=question,
-                unique_id=selected_unique_id,
-            )
-
-        st.markdown("---")
-
-        # If multiple LOBs were queried, show a combined summary first.
-        if len(results) > 1:
-            st.subheader("Combined Answer")
-            st.markdown(synthesize_combined_answer(question, results))
-            st.markdown("---")
-
-        st.subheader("Answer" if len(results) == 1 else "Per-Agent Answers")
-
-        # Each agent's raw answer, in its own tab, so it's clear which LOB
-        # agent produced which part of the answer.
-        tabs = st.tabs([r["lob"] for r in results])
-        for tab, result in zip(tabs, results):
-            with tab:
-                st.caption(f"Agent: `{result['agent_id']}`")
-                st.write(result["answer"])
-                if result.get("sql"):
-                    with st.expander("Generated SQL (debug)"):
-                        st.code(result["sql"], language="sql")
-
-# ---- Footer -------------------------------------------------------------
-st.markdown("---")
-st.caption(
-    "Demo UI only. Search box → routes to the Genie agent(s) mapped to the "
-    "selected Line(s) of Business, filtered by the chosen Unique ID. "
-    "Selecting multiple lines of business fans the question out to each "
-    "agent concurrently and merges their answers."
+resp = client.responses.create(
+    model=ENDPOINT,
+    input=[{"role": "user", "content": question}],
 )
+
+print(extract_text(resp))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Step 5: Stream the answer (recommended)
+# MAGIC
+# MAGIC Shows progress instead of leaving the cell hanging for a minute or more.
+
+# COMMAND ----------
+
+stream = client.responses.create(
+    model=ENDPOINT,
+    input=[{"role": "user", "content": question}],
+    stream=True,
+)
+
+for chunk in stream:
+    if getattr(chunk, "type", "") == "response.output_text.delta":
+        print(chunk.delta, end="")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Step 6: Multi-turn conversation
+# MAGIC
+# MAGIC The endpoint is stateless, so resend the history on every call.
+# MAGIC
+# MAGIC Only the assistant's text is appended (not the full `resp.output`) to keep the
+# MAGIC payload clean and avoid resending tool-call items the endpoint may reject.
+
+# COMMAND ----------
+
+history = []
+
+
+def ask(question, stream=False):
+    history.append({"role": "user", "content": question})
+
+    if stream:
+        parts = []
+        for chunk in client.responses.create(model=ENDPOINT, input=history, stream=True):
+            if getattr(chunk, "type", "") == "response.output_text.delta":
+                print(chunk.delta, end="")
+                parts.append(chunk.delta)
+        print()
+        answer = "".join(parts)
+    else:
+        resp = client.responses.create(model=ENDPOINT, input=history)
+        answer = extract_text(resp)
+
+    history.append({"role": "assistant", "content": answer})
+    return answer
+
+
+print(ask("How many active users did we have in August?"))
+print(ask("And how does that compare to July?"))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Step 7: Render nicely (optional)
+
+# COMMAND ----------
+
+answer = ask("Give me a short markdown summary of last quarter's performance.")
+
+displayHTML(f"<div style='font-family:sans-serif;white-space:pre-wrap'>{answer}</div>")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Reusable input widget (optional)
+
+# COMMAND ----------
+
+dbutils.widgets.text("question", "", "Ask the supervisor")
+
+q = dbutils.widgets.get("question")
+if q.strip():
+    print(ask(q, stream=True))
+else:
+    print("Enter a question in the widget at the top of the notebook.")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Troubleshooting
+# MAGIC
+# MAGIC | Symptom | Likely cause |
+# MAGIC |---|---|
+# MAGIC | `PERMISSION_DENIED` / 403 | You lack `CAN QUERY` on the supervisor. Agents page -> kebab menu -> Manage permissions. |
+# MAGIC | Endpoint not in the `list()` output | Wrong workspace, or you have no permission to see it. |
+# MAGIC | Agent replies but refuses to answer, or ends the conversation | You lack access to the **subagents**. Genie Agent needs the underlying UC grants; Knowledge Assistant needs `CAN QUERY` on its endpoint; UC function needs `EXECUTE`; UC table needs `SELECT` + `USE CATALOG` + `USE SCHEMA`. |
+# MAGIC | Empty string from `extract_text` | Inspect the raw shape with `resp.model_dump()`. |
+# MAGIC | Timeout | Raise `timeout` on the client, or use background mode -- see the Supervisor Agent long-running tasks docs. |
+# MAGIC | `404` on `responses.create` | The endpoint may expose Chat Completions instead. Try `client.chat.completions.create(model=ENDPOINT, messages=[...])`. |
+# MAGIC | First call is very slow, then fast | Scale-to-zero cold start. Normal. |
+# MAGIC
+# MAGIC If you schedule this as a job, it runs as a **service principal**, not as you --
+# MAGIC that principal needs the same supervisor and subagent permissions listed above.
