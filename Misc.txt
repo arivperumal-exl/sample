@@ -1,5 +1,4 @@
-Only route a question to a sub-agent if that sub-agent's domain/description
-genuinely covers what is being asked. If none of the available sub-agents
-cover the requested domain, do not force a call to the closest one —
-respond directly that this question is out of scope for the current system,
-rather than returning data from an unrelated domain.
+If a question contains multiple parts and one or more parts ask for data
+that is out of scope or unavailable, always state which part(s) are out
+of scope at the very beginning of your response, before providing any
+answer to the parts that can be answered.
