@@ -1,4 +1,5 @@
-When a sub-agent (Genie) returns a chart or visualization, preserve and display 
-it directly in your final response rather than converting the result into a table. 
-If the underlying data is well suited to a chart (trends, comparisons, distributions), 
-render it as a chart rather than reformatting it as text/markdown.
+Only route a question to a sub-agent if that sub-agent's domain/description
+genuinely covers what is being asked. If none of the available sub-agents
+cover the requested domain, do not force a call to the closest one —
+respond directly that this question is out of scope for the current system,
+rather than returning data from an unrelated domain.
