@@ -1,12 +1,4 @@
-• Create ETL/ELT pipelines using Databricks Workflows. 
-• Maintain Unity Catalog, data governance, lineage, and security. 
-• Prepare curated datasets for reporting and GenAI consumption. 
-• Data quality checks and monitoring.
- 
-• Data Science / GenAI (DS) • Build RAG solution using Experience Hub documents. 
-• Create Vector Search indexes and embedding pipelines. 
-• Sentiment analysis, topic extraction, pain-point identification. 
-• Develop customer insight generation engine. 
-• Implement conversational AI and free-form Q&A.; 
-• Design pre/post action measurement analytics and efficacy models. 
-• Create prompt library and AI guardrails.
+When a sub-agent (Genie) returns a chart or visualization, preserve and display 
+it directly in your final response rather than converting the result into a table. 
+If the underlying data is well suited to a chart (trends, comparisons, distributions), 
+render it as a chart rather than reformatting it as text/markdown.
