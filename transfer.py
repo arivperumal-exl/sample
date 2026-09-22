@@ -1,6 +1,3 @@
-import mlflow
-
-trace = mlflow.get_trace("tr-your-trace-id")
-for s in trace.data.spans:
-    print(s.span_id, "| name:", s.name, "| type:", s.span_type)
-    print("  outputs:", s.outputs)
+def supervisor_predict_fn(question: str) -> dict:
+    result = my_supervisor_agent.invoke({"messages": [{"role": "user", "content": question}]})
+    return {"response": result["messages"][-1]["content"]}
