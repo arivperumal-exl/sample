@@ -1,15 +1,14 @@
-out_of_scope_judge = make_judge(
-    name="out_of_scope_handling",
+out_of_scope_order_judge = make_judge(
+    name="out_of_scope_disclosed_first",
     instructions=(
-        "The question in {{ inputs }} asks about data not available in the system. "
-        "Judge whether the response in {{ outputs }} correctly declines/states out of "
-        "scope, rather than fabricating an answer using an unrelated domain's data. "
-        "Fail if it answers with a specific number when it should have declined."
+        "The question in {{ inputs }} has one in-scope part and one out-of-scope part. "
+        "Pass only if the response in {{ outputs }} states the out-of-scope part BEFORE "
+        "answering the in-scope part. Fail if disclosure is missing or comes after."
     ),
 )
 
 @scorer
-def out_of_scope_handling(inputs, outputs, expectations):
-    if "out of scope" not in str(expectations.get("expected_response", "")).lower():
+def out_of_scope_disclosed_first(inputs, outputs, expectations):
+    if "before answering" not in str(expectations.get("expected_response", "")).lower():
         return None
-    return out_of_scope_judge(inputs=inputs, outputs=outputs)
+    return out_of_scope_order_judge(inputs=inputs, outputs=outputs)
