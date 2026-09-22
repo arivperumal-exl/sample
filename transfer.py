@@ -1,3 +1,10 @@
-import mlflow.genai.datasets
+from databricks.sdk import WorkspaceClient
 
-dataset = mlflow.genai.datasets.get_dataset(name="catalog.schema.your_eval_dataset")
+w = WorkspaceClient()
+
+def supervisor_predict_fn(question: str) -> dict:
+    response = w.serving_endpoints.query(
+        name="your-supervisor-endpoint-name",  # TODO: your actual endpoint name
+        messages=[{"role": "user", "content": question}],
+    )
+    return {"response": response.choices[0].message.content}
