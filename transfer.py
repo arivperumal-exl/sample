@@ -1,19 +1,39 @@
-from mlflow.genai.scorers import scorer
-from mlflow.entities import Feedback
+from mlflow.genai.judges import make_judge
 
-GENIE_SPAN_TYPES = ("TOOL", "AGENT")  # confirmed from Step 3
+sql_equivalence_judge = make_judge(
+    name="sql_equivalence",
+    instructions=(
+        "Compare the generated SQL to the expected SQL. They are equivalent if they "
+        "would return the same result, even if written differently (aliases, clause "
+        "order, formatting, join syntax). "
+        "Expected: {{ expectations }}\nGenerated: {{ outputs }}"
+    ),
+)
 
 @scorer
-def correct_routing(expectations, trace):
-    expected = expectations.get("expected_agents") or expectations.get("expected_agent")
-    if not expected:
+def sql_correctness(expectations, trace):
+    expected_map = expectations.get("expected_sql_by_agent")
+    if not expected_map and expectations.get("expected_sql"):
+        expected_map = {"_single": expectations["expected_sql"]}
+    if not expected_map:
         return None
-    expected_agents = expected if isinstance(expected, list) else [expected]
 
-    called_agents = [s.name for s in trace.data.spans if s.span_type in GENIE_SPAN_TYPES]
-    missing = [a for a in expected_agents if not any(a in c for c in called_agents)]
+    genie_spans = [s for s in trace.data.spans if "genie" in s.name.lower()]
+    per_agent_results = {}
 
-    return Feedback(
-        value=len(missing) == 0,
-        rationale=f"Expected: {expected_agents} | Called: {called_agents} | Missing: {missing}",
-    )
+    for agent_name, expected_sql in expected_map.items():
+        matching_span = (
+            genie_spans[0] if agent_name == "_single" and genie_spans
+            else next((s for s in genie_spans if agent_name in s.name), None)
+        )
+        if matching_span is None:
+            per_agent_results[agent_name] = False
+            continue
+        generated_sql = matching_span.outputs.get("query") or matching_span.outputs.get("sql")
+        verdict = sql_equivalence_judge(
+            expectations={"expected_sql": expected_sql},
+            outputs={"generated_sql": generated_sql},
+        )
+        per_agent_results[agent_name] = verdict.value
+
+    return Feedback(value=all(per_agent_results.values()), rationale=str(per_agent_results))
