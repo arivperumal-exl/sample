@@ -1,14 +1,10 @@
-out_of_scope_order_judge = make_judge(
-    name="out_of_scope_disclosed_first",
-    instructions=(
-        "The question in {{ inputs }} has one in-scope part and one out-of-scope part. "
-        "Pass only if the response in {{ outputs }} states the out-of-scope part BEFORE "
-        "answering the in-scope part. Fail if disclosure is missing or comes after."
-    ),
-)
+import mlflow
 
-@scorer
-def out_of_scope_disclosed_first(inputs, outputs, expectations):
-    if "before answering" not in str(expectations.get("expected_response", "")).lower():
-        return None
-    return out_of_scope_order_judge(inputs=inputs, outputs=outputs)
+mlflow.set_experiment("/Users/you@company.com/genie-supervisor-eval")
+
+with mlflow.start_run(run_name="supervisor_eval_v1"):
+    results = mlflow.genai.evaluate(
+        data=dataset,
+        predict_fn=supervisor_predict_fn,
+        scorers=[correct_routing, sql_correctness, out_of_scope_handling, out_of_scope_disclosed_first],
+    )
