@@ -1,25 +1,17 @@
-import mlflow
 import mlflow.genai.datasets
-from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
 
-# TODO: your dataset name from Step 3 (check the Datasets tab for the exact name)
 dataset = mlflow.genai.datasets.get_dataset(name="catalog.schema.agent_eval_questions")
 
-# TODO: your agent's serving endpoint name (find it under "Serving" in the left sidebar)
-w = WorkspaceClient()
+records = [
+    {
+        "inputs": {"question": "How many sales cases were there in Q3?"},
+        "expectations": {"expected_response": "There were 42 sales cases in Q3."}
+    },
+    {
+        "inputs": {"question": "What is the total count of support tickets last month?"},
+        "expectations": {"expected_sql": "SELECT COUNT(*) FROM tickets WHERE ..."}
+    },
+    # add as many as you want here
+]
 
-def ask_my_agent(question: str) -> dict:
-    response = w.serving_endpoints.query(
-        name="your-supervisor-endpoint-name",
-        messages=[ChatMessage(role=ChatMessageRole.USER, content=question)],
-    )
-    choice = response.choices[0] if response.choices else None
-    message = choice.message if choice else None
-    return {"response": message.content if message else ""}
-
-with mlflow.start_run(run_name="first_eval_run"):
-    results = mlflow.genai.evaluate(
-        data=dataset,
-        predict_fn=ask_my_agent,
-    )
+dataset = dataset.merge_records(records)
