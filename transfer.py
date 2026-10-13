@@ -1,17 +1,19 @@
-import mlflow.genai.datasets
+import requests
+from databricks.sdk import WorkspaceClient
 
-dataset = mlflow.genai.datasets.get_dataset(name="catalog.schema.agent_eval_questions")
+w = WorkspaceClient()
 
-records = [
-    {
-        "inputs": {"question": "How many sales cases were there in Q3?"},
-        "expectations": {"expected_response": "There were 42 sales cases in Q3."}
-    },
-    {
-        "inputs": {"question": "What is the total count of support tickets last month?"},
-        "expectations": {"expected_sql": "SELECT COUNT(*) FROM tickets WHERE ..."}
-    },
-    # add as many as you want here
-]
+# Get workspace URL and auth token automatically
+host = w.config.host
+token = w.config.token
 
-dataset = dataset.merge_records(records)
+def ask_my_agent(question: str) -> dict:
+    url = f"{host}/serving-endpoints/your-supervisor-endpoint-name/invocations"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {"messages": [{"role": "user", "content": question}]}
+
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()  # throws a clear error if the HTTP call itself failed
+    result = response.json()    # plain Python dict, no SDK typing involved
+
+    return result
