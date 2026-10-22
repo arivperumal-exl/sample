@@ -1,3 +1,5 @@
+from mlflow.genai.judges import make_judge
+
 correctness_judge = make_judge(
     name="correctness_check",
     instructions=(
