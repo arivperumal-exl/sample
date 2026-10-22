@@ -1,13 +1,10 @@
-import requests
-from databricks.sdk import WorkspaceClient
-
-w = WorkspaceClient()
-
-url = f"{w.config.host}/serving-endpoints/your-supervisor-endpoint-name/invocations"
-headers = w.config.authenticate()
-headers["Content-Type"] = "application/json"
-payload = {"messages": [{"role": "user", "content": "abc"}]}
-
-response = requests.post(url, headers=headers, json=payload)
-print(response.status_code)
-print(response.text)   # <-- this is the part we actually need
+correctness_judge = make_judge(
+    name="correctness_check",
+    instructions=(
+        "Judge whether the response correctly answers the question asked, "
+        "based on the data in the system. Mark it as failing if it makes up "
+        "an answer using data that doesn't exist, or answers a different "
+        "question than what was asked. "
+        "Question: {{ inputs }}\nResponse: {{ outputs }}"
+    ),
+)
