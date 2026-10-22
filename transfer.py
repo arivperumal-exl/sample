@@ -1,12 +1,12 @@
-from mlflow.genai.judges import make_judge
+from mlflow.genai.scorers import scorer
+from mlflow.entities import Feedback
 
-correctness_judge = make_judge(
-    name="correctness_check",
-    instructions=(
-        "Judge whether the response correctly answers the question asked, "
-        "based on the data in the system. Mark it as failing if it makes up "
-        "an answer using data that doesn't exist, or answers a different "
-        "question than what was asked. "
-        "Question: {{ inputs }}\nResponse: {{ outputs }}"
-    ),
-)
+@scorer
+def agent_name_mentioned(outputs, expectations):
+    expected_name = expectations.get("expected_agent_name")
+    response_text = outputs.get("response", "")
+    passed = expected_name.lower() in response_text.lower()
+    return Feedback(
+        value=passed,
+        rationale=f"Looking for '{expected_name}' in response: {'found' if passed else 'not found'}",
+    )
