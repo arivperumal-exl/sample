@@ -1,12 +1,14 @@
-from mlflow.genai.scorers import scorer
-from mlflow.entities import Feedback
+from mlflow.genai.judges import make_judge
 
-@scorer
-def agent_name_mentioned(outputs, expectations):
-    expected_name = expectations.get("expected_agent_name")
-    response_text = outputs.get("response", "")
-    passed = expected_name.lower() in response_text.lower()
-    return Feedback(
-        value=passed,
-        rationale=f"Looking for '{expected_name}' in response: {'found' if passed else 'not found'}",
-    )
+agent_name_judge = make_judge(
+    name="agent_name_check",
+    instructions=(
+        "Check whether the response mentions or refers to using the expected "
+        "sub-agent/data source. This can be an exact name match, or a close "
+        "paraphrase that clearly refers to the same source (e.g. 'sales data', "
+        "'the sales system' both count as referring to 'sales_genie_space'). "
+        "Fail only if there is no reasonable indication the expected source was used. "
+        "Expected agent: {{ expectations }}\n"
+        "Response: {{ outputs }}"
+    ),
+)
