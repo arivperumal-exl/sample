@@ -1,12 +1,7 @@
 import json
-import sys
-
 from databricks.sdk import WorkspaceClient
 from databricks_openai import DatabricksOpenAI
 
-# ----------------------------------------------------------------------------
-# Config
-# ----------------------------------------------------------------------------
 ENDPOINT = "<your-supervisor-endpoint-name>"
 
 # Optional manual overrides: tool name / Genie space ID -> friendly name
@@ -16,18 +11,11 @@ MANUAL_NAMES = {
 
 MAX_RESULT_CHARS = 500
 
-# ----------------------------------------------------------------------------
-# Clients
-# ----------------------------------------------------------------------------
 w = WorkspaceClient()
 client = DatabricksOpenAI()
 
 
-# ----------------------------------------------------------------------------
-# Helpers
-# ----------------------------------------------------------------------------
 def load_genie_names() -> dict:
-    """Fetch Genie space_id -> title mapping once."""
     names = {}
     try:
         page_token = None
@@ -43,7 +31,7 @@ def load_genie_names() -> dict:
             if not page_token:
                 break
     except Exception as e:
-        print(f"[warn] Could not list Genie spaces: {e}", file=sys.stderr)
+        print(f"[warn] Could not list Genie spaces: {e}")
     names.update(MANUAL_NAMES)
     return names
 
@@ -52,7 +40,6 @@ GENIE_NAMES = load_genie_names()
 
 
 def friendly_name(tool_name: str) -> str:
-    """Return the Genie space title if the tool name contains a known space ID."""
     for space_id, title in GENIE_NAMES.items():
         if space_id and space_id in tool_name:
             return title
@@ -60,7 +47,6 @@ def friendly_name(tool_name: str) -> str:
 
 
 def format_args(arguments: str) -> str:
-    """Turn the JSON arguments into plain text (no brackets / quotes)."""
     try:
         data = json.loads(arguments)
     except Exception:
@@ -81,9 +67,6 @@ def truncate(text, limit: int = MAX_RESULT_CHARS) -> str:
     return text if len(text) <= limit else text[:limit] + "..."
 
 
-# ----------------------------------------------------------------------------
-# Main
-# ----------------------------------------------------------------------------
 def ask(question: str, debug: bool = False) -> None:
     stream = client.responses.create(
         model=ENDPOINT,
@@ -119,8 +102,3 @@ def ask(question: str, debug: bool = False) -> None:
             print(event.delta, end="", flush=True)
 
     print()
-
-
-if __name__ == "__main__":
-    q = " ".join(sys.argv[1:]) or input("Question: ")
-    ask(q)
